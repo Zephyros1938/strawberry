@@ -1,0 +1,1 @@
+g++ @build.rsp && ./app

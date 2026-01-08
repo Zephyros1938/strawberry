@@ -2,10 +2,15 @@
 #include "assetManager.h"
 #include "camera.h"
 #include "ecs.h"
+#include "external/imgui.h"
+#include "external/imgui_impl_glfw.h"
+#include "external/imgui_impl_opengl3.h"
 #include "input/mouseHandler.h"
 #include "shader.h"
 #include <GLFW/glfw3.h>
 #include <cstdlib>
+#include <iostream>
+#include <ostream>
 #include <string>
 
 #define GAME_H
@@ -46,21 +51,23 @@ Game::Game(int w, int h, const std::string &title)
 void Game::setupScene() {
   Mesh *mesh =
       &AssetManager::loadMesh("cheetah", "assets/models/cheetah/cheetah.obj");
+  Shader *shader = &AssetManager::loadShader(
+      "default", "assets/shaders/default.vert", "assets/shaders/default.frag");
 
-  for (int i = -1; i < 2; i++) {
-    Entity e = world.createEntity();
-    world.addFrame(e, CFrame{glm::vec3(i, 0, 0), glm::vec3(0), glm::vec3(1)});
+  for (int y = -25; y < 25; y++) {
+    for (int x = -25; x < 25; x++) {
+      Entity e = world.createEntity();
+      world.addFrame(e, CFrame{glm::vec3(x, y, 0), glm::vec3(0), glm::vec3(1)});
 
-    Shader *shader =
-        &AssetManager::loadShader("default", "assets/shaders/default.vert",
-                                  "assets/shaders/default.frag");
-
-    EntityRenderData rd(*shader);
-    rd.vaoID = mesh->VAO;
-    rd.indiceCount = mesh->indexCount;
-    rd.textures = mesh->textures;
-    world.addRenderData(e, rd);
+      EntityRenderData rd(*shader);
+      rd.vaoID = mesh->VAO;
+      rd.indiceCount = mesh->indexCount;
+      rd.textures = mesh->textures;
+      world.addRenderData(e, rd);
+    }
   }
+
+  guiSystem.init(window);
 
   std::cout << "Finished setting up." << std::endl;
 }
@@ -80,23 +87,38 @@ void Game::run() {
     glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    // ImGui::ShowDemoWindow();
+    ImGui::Begin("Debug");
+    ImGui::Text("FPS: %.3f", 1.0 / deltaTime);
+    ImGui::Text("Entities (Renderable): %lu", world.renderDataMap().size());
+    ImGui::SeparatorText("Camera");
+    ImGui::Text("Position: (%.3f,%.3f,%.3f)", camera.position.x,
+                camera.position.y, camera.position.z);
+    ImGui::Text("Pitch: %.3f, Yaw: %.3f", camera.pitch, camera.yaw);
+    ImGui::Text("Zoom: %.3f", camera.zoom);
+    ImGui::End();
     renderSystem.render(world, camera);
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   }
   glfwTerminate();
 }
 
 void Game::processInput() {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+  if (inputSystem.isPressed(GLFW_KEY_ESCAPE))
     glfwSetWindowShouldClose(window, true);
 
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+  if (inputSystem.isDown(GLFW_KEY_W))
     camera.position += camera.front * camera.moveSpeed * deltaTime;
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+  if (inputSystem.isDown(GLFW_KEY_S))
     camera.position -= camera.front * camera.moveSpeed * deltaTime;
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+  if (inputSystem.isDown(GLFW_KEY_A))
     camera.position -= glm::normalize(glm::cross(camera.front, camera.up)) *
                        camera.moveSpeed * deltaTime;
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+  if (inputSystem.isDown(GLFW_KEY_D))
     camera.position += glm::normalize(glm::cross(camera.front, camera.up)) *
                        camera.moveSpeed * deltaTime;
 }
@@ -129,15 +151,21 @@ void Game::keyCallback(GLFWwindow *w, int key, int scancode, int action,
   Game *game = static_cast<Game *>(glfwGetWindowUserPointer(w));
 
   game->inputSystem.handleInput(key, scancode, action, mods);
+  // std::cout << key << ":" << action << std::endl;
 
   if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS) {
     game->mouseHandler.locked = !game->mouseHandler.locked;
   }
 
-  if (!game->mouseHandler.locked)
+  if (!game->mouseHandler.locked) {
+    game->guiSystem.setMouseEnabled(true);
     glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-  else
+  }
+
+  else {
+    game->guiSystem.setMouseEnabled(false);
     glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  }
 }
 
 Game::~Game() {}

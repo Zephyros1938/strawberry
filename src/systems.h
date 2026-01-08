@@ -31,7 +31,7 @@ public:
       rd.shader.setMat4("uCameraProjection", camera.getProjectionMatrix());
 
       glBindVertexArray(rd.vaoID);
-      glDrawElements(rd.drawType, rd.indiceCount, GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_TRIANGLES, rd.indiceCount, GL_UNSIGNED_INT, 0);
     }
   }
 };

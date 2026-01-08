@@ -1,7 +1,6 @@
 #ifndef ECS_H
 #define ECS_H
 
-#include "camera.h"
 #include "shader.h"
 #include "texture.h"
 #include <cstdint>
@@ -17,6 +16,9 @@ using Entity = uint32_t;
 class EntityRenderData {
 public:
   EntityRenderData(Shader &s) : shader(s) {}
+  EntityRenderData(Shader &s, unsigned int vaoID, unsigned int indiceCount,
+                   std::vector<Texture *> textures)
+      : shader(s), vaoID(vaoID), indiceCount(indiceCount), textures(textures) {}
 
   Shader &shader;
   unsigned int vaoID = 0;

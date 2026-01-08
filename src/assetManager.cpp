@@ -134,6 +134,8 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
   return meshes[name];
 }
 
+Mesh &AssetManager::getMesh(const std::string &name) { return meshes.at(name); }
+
 std::map<std::string, Texture> AssetManager::textures;
 std::map<std::string, Shader> AssetManager::shaders;
 std::map<std::string, Mesh> AssetManager::meshes;

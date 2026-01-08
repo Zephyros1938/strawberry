@@ -28,6 +28,7 @@ public:
 
   // Meshes
   static Mesh &loadMesh(const std::string &name, const char *path);
+  static Mesh &getMesh(const std::string &name);
 
   static std::map<std::string, Texture> textures;
   static std::map<std::string, Shader> shaders;

@@ -38,3 +38,4 @@
 
 # debug information files
 *.dwo
+.cache/*

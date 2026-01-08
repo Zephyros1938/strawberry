@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-char *loadFileToCstr(const char *path) {
+inline char *loadFileToCstr(const char *path) {
   std::ifstream file(path, std::ios::binary | std::ios::ate);
   if (!file)
     return nullptr;

@@ -6,7 +6,7 @@ class MouseHandler {
 public:
   bool locked;
   MouseHandler(float x, float y)
-      : lastX(x), lastY(y), firstMouse(true), locked(true), scrollY(0) {};
+      : locked(false), firstMouse(true), lastX(x), lastY(y), scrollY(0) {};
   glm::vec2 handleMouse(float xp, float yp) {
     if (firstMouse) {
       lastX = xp;

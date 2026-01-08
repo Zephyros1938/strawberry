@@ -4,7 +4,9 @@
 -lGL
 -Wall
 -Wextra
--DSTB_IMAGE_IMPLEMENTATION
 src/main.cpp
+src/game.cpp
+src/texture.cpp
+src/assetManager.cpp
 src/glad/glad.c
 -o app

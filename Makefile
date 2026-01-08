@@ -4,13 +4,14 @@ CXXFLAGS = -std=c++20 -O2 -Wall -Wextra \
            -I./include -I./src \
            -I./external/imgui -I./external/imgui/backends \
            -I./external/tinyobjloader \
+					 -I./include/glad \
            -DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK -MP -MMD
 
-LDFLAGS = -lglfw3 -lGL -lwayland-client -lxkbcommon -lpthread -ldl -lstb
+LDFLAGS = -lglfw -lGL -lwayland-client -lxkbcommon -lpthread -ldl
 
 # Updated SRCS to point to the new submodule locations
 SRCS = src/main.cpp src/game.cpp src/texture.cpp src/assetManager.cpp \
-       src/glad/glad.c \
+       include/glad/glad.c \
        external/imgui/imgui.cpp \
        external/imgui/imgui_draw.cpp \
        external/imgui/imgui_widgets.cpp \

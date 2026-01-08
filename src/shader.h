@@ -5,13 +5,12 @@
 #include "glad/glad.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <regex>
+
 #include <unordered_map>
 #include <vector>
 
-#include <fstream>
 #include <iostream>
-#include <sstream>
+
 #include <string>
 
 inline bool getShaderCompileSuccess(unsigned int shader) {

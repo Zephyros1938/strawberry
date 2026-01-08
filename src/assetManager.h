@@ -1,12 +1,11 @@
 #ifndef ASSET_MANAGER_H
 #define ASSET_MANAGER_H
 
-#include "external/tiny_obj_loader.h"
 #include "shader.h"
 #include "texture.h"
+#include "tiny_obj_loader.h"
 #include <map>
 #include <string>
-#include <unordered_map>
 
 struct Mesh {
   unsigned int VAO;

@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <iostream>
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "external/tiny_obj_loader.h"
+#include "tiny_obj_loader.h"
 
 Texture &AssetManager::loadTexture(const std::string &name, const char *path) {
   auto it = textures.find(name);
@@ -52,7 +52,7 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
   std::string warn, err;
 
   std::string objDir = std::filesystem::path(path).parent_path().string() + "/";
-  if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, path,
+  if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path,
                         objDir.c_str())) {
     std::cerr << "Failed to load OBJ: " << err << std::endl;
     exit(-1);

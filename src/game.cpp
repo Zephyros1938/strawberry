@@ -2,9 +2,9 @@
 #include "assetManager.h"
 #include "camera.h"
 #include "ecs.h"
-#include "external/imgui.h"
-#include "external/imgui_impl_glfw.h"
-#include "external/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "input/mouseHandler.h"
 #include "shader.h"
 #include <GLFW/glfw3.h>

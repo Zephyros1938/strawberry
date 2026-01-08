@@ -1,17 +1,26 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -O2 -Wall -Wextra -I./include -I./src -I./src/external -DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK -MP -MMD
+# Added new include paths for the submodules
+CXXFLAGS = -std=c++20 -O2 -Wall -Wextra \
+           -I./include -I./src \
+           -I./external/imgui -I./external/imgui/backends \
+           -I./external/tinyobjloader \
+           -DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK -MP -MMD
+
 LDFLAGS = -lglfw3 -lGL -lwayland-client -lxkbcommon -lpthread -ldl -lstb
 
-# List your source files here
+# Updated SRCS to point to the new submodule locations
 SRCS = src/main.cpp src/game.cpp src/texture.cpp src/assetManager.cpp \
-       src/glad/glad.c src/external/imgui.cpp src/external/imgui_draw.cpp \
-       src/external/imgui_widgets.cpp src/external/imgui_tables.cpp \
-       src/external/imgui_demo.cpp src/external/imgui_impl_glfw.cpp \
-       src/external/imgui_impl_opengl3.cpp
+       src/glad/glad.c \
+       external/imgui/imgui.cpp \
+       external/imgui/imgui_draw.cpp \
+       external/imgui/imgui_widgets.cpp \
+       external/imgui/imgui_tables.cpp \
+       external/imgui/imgui_demo.cpp \
+       external/imgui/backends/imgui_impl_glfw.cpp \
+       external/imgui/backends/imgui_impl_opengl3.cpp
 
 # Convert source file names to object file names (.o)
-OBJS = $(SRCS:.cpp=.o)
-OBJS := $(OBJS:.c=.o)
+OBJS = $(addsuffix .o, $(basename $(SRCS)))
 DEPS = $(OBJS:.o=.d)
 
 all: app

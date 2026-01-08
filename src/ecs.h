@@ -22,6 +22,7 @@ public:
   unsigned int vaoID = 0;
   unsigned int indiceCount = 0;
   GLint drawType = GL_TRIANGLES;
+  std::vector<Texture *> textures = {};
 };
 
 class CFrame {

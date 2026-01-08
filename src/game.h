@@ -40,7 +40,6 @@ private:
   World world;
   RenderSystem renderSystem;
   InputSystem inputSystem;
-  AssetManager assetManager;
 
   float deltaTime;
   float lastFrame;

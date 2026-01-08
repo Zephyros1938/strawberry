@@ -1,8 +1,9 @@
 #include "game.h"
+#include "assetManager.h"
 #include "camera.h"
+#include "ecs.h"
 #include "input/mouseHandler.h"
 #include "shader.h"
-#include "texture.h"
 #include <GLFW/glfw3.h>
 #include <cstdlib>
 #include <string>
@@ -12,6 +13,8 @@
 Game::Game(int w, int h, const std::string &title)
     : width(w), height(h), window(nullptr), camera(), mouseHandler(0, 0),
       deltaTime(0.0), lastFrame(0.0) {
+
+  camera.zoom = 20.0;
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -37,57 +40,33 @@ Game::Game(int w, int h, const std::string &title)
   glfwSetScrollCallback(window, mouseScrollCallback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-  std::cout << "Finished pass 0" << std::endl;
-
   setupScene();
 }
 
 void Game::setupScene() {
-  const float vertices[] = {
-      0.5,  0.5,  0.0, 1.0, 0.0, 0.0, 1.0, 1.0, // 1
-      0.5,  -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, // 2
-      -0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, // 3
-      -0.5, 0.5,  0.0, 1.0, 1.0, 0.0, 0.0, 1.0, // 4
-  };
-  const unsigned int indices[] = {0, 1, 3, 1, 2, 3};
-  // Vertex data, VAO, VBO, EBO setup
-  unsigned int VBO, EBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
+  Mesh *mesh = &AssetManager::loadMesh(
+      "cheetah", "assets/models/rising_sun/rising_sun.obj");
 
-  glBindVertexArray(VAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-               GL_STATIC_DRAW);
+  for (int i = -1; i < 2; i++) {
+    Entity e = world.createEntity();
+    world.addFrame(e, CFrame{glm::vec3(i, 0, 0), glm::vec3(0), glm::vec3(1)});
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
+    Shader *shader =
+        &AssetManager::loadShader("default", "assets/shaders/default.vert",
+                                  "assets/shaders/default.frag");
 
-  Entity e = world.createEntity();
-  world.addFrame(e, CFrame{glm::vec3(0), glm::vec3(0), glm::vec3(1)});
-  Shader *shader = &AssetManager::loadShader(
-      "default", "assets/shaders/default.vert", "assets/shaders/default.frag");
-  Texture *tex =
-      &AssetManager::loadTexture("cheetah", "assets/images/cheetahlogo.png");
+    EntityRenderData rd(*shader);
+    rd.vaoID = mesh->VAO;
+    rd.indiceCount = mesh->indexCount;
+    rd.textures = mesh->textures;
+    world.addRenderData(e, rd);
+  }
 
-  EntityRenderData rd(*shader);
-  rd.vaoID = VAO;
-  rd.indiceCount = 6;
-  world.addRenderData(e, rd);
-  std::cout << "Finished pass 1" << std::endl;
+  std::cout << "Finished setting up." << std::endl;
 }
 
 void Game::run() {
-  std::cout << "Running!" << std::endl;
+  std::cout << "Running..." << std::endl;
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
@@ -124,6 +103,7 @@ void Game::processInput() {
 
 void Game::framebufferSizeCallback(GLFWwindow *w, int width, int height) {
   Game *game = static_cast<Game *>(glfwGetWindowUserPointer(w));
+  std::cout << "Window resized to " << width << "x" << height << std::endl;
   game->width = width;
   game->height = height;
   glViewport(0, 0, width, height);

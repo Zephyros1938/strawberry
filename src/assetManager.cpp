@@ -1,7 +1,10 @@
 #include "assetManager.h"
 #include "shader.h"
 #include "texture.h"
+#include <filesystem>
 #include <iostream>
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "external/tiny_obj_loader.h"
 
 Texture &AssetManager::loadTexture(const std::string &name, const char *path) {
   auto it = textures.find(name);
@@ -37,5 +40,100 @@ Shader &AssetManager::loadShader(const std::string &name,
 Shader &AssetManager::getShader(const std::string &name) {
   return shaders.at(name);
 }
+
+Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
+  std::cout << "Loading mesh \"" << name << "\" (" << path << ")" << std::endl;
+  if (meshes.find(name) != meshes.end())
+    return meshes[name];
+
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+  std::string warn, err;
+
+  std::string objDir = std::filesystem::path(path).parent_path().string() + "/";
+  if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, path,
+                        objDir.c_str())) {
+    std::cerr << "Failed to load OBJ: " << err << std::endl;
+    exit(-1);
+  }
+
+  std::vector<float> vertices;
+  std::vector<unsigned int> indices;
+
+  for (const auto &shape : shapes) {
+    for (const auto &index : shape.mesh.indices) {
+      vertices.push_back(attrib.vertices[3 * index.vertex_index + 0]);
+      vertices.push_back(attrib.vertices[3 * index.vertex_index + 1]);
+      vertices.push_back(attrib.vertices[3 * index.vertex_index + 2]);
+
+      if (!attrib.normals.empty()) {
+        vertices.push_back(attrib.normals[3 * index.normal_index + 0]);
+        vertices.push_back(attrib.normals[3 * index.normal_index + 1]);
+        vertices.push_back(attrib.normals[3 * index.normal_index + 2]);
+      } else {
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+      }
+
+      if (!attrib.texcoords.empty()) {
+        vertices.push_back(attrib.texcoords[2 * index.texcoord_index + 0]);
+        vertices.push_back(attrib.texcoords[2 * index.texcoord_index + 1]);
+      } else {
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+      }
+
+      indices.push_back(indices.size());
+    }
+  }
+
+  unsigned int VAO, VBO, EBO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float),
+               vertices.data(), GL_STATIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+               indices.data(), GL_STATIC_DRAW);
+
+  // vertex positions
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+  // vertex normals
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+  // texcoords
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  std::vector<Texture *> meshTextures;
+  for (const auto &mat : materials) {
+    std::cout << "\tFound material \"" << mat.name << "\", diffuse texname: \""
+              << mat.diffuse_texname << "\"\n";
+    if (!mat.diffuse_texname.empty()) {
+      std::string objDir =
+          std::filesystem::path(path).parent_path().string() + "/";
+      std::string texPath = objDir + mat.diffuse_texname;
+      std::cout << "\tLoading texture file: " << texPath << std::endl;
+      Texture *tex = &AssetManager::loadTexture(mat.name, texPath.c_str());
+      meshTextures.push_back(tex);
+    }
+  }
+
+  Mesh mesh{VAO, VBO, EBO, static_cast<unsigned int>(indices.size()),
+            meshTextures};
+  meshes[name] = mesh;
+  return meshes[name];
+}
+
 std::map<std::string, Texture> AssetManager::textures;
 std::map<std::string, Shader> AssetManager::shaders;
+std::map<std::string, Mesh> AssetManager::meshes;

@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "ecs.h"
+#include "texture.h"
 #include <GLFW/glfw3.h>
 
 class RenderSystem {
@@ -15,6 +16,11 @@ public:
 
       auto &rd = pair.second;
       auto &frame = world.getFrame(e);
+
+      for (size_t i = 0; i < rd.textures.size(); i++) {
+        Texture *t = rd.textures[i];
+        t->bind(GL_TEXTURE0 + i);
+      }
 
       rd.shader.use();
       rd.shader.setMat4("uModel", frame.getMat4());

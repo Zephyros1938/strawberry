@@ -1,11 +1,21 @@
 #ifndef ASSET_MANAGER_H
 #define ASSET_MANAGER_H
 
+#include "external/tiny_obj_loader.h"
 #include "shader.h"
 #include "texture.h"
 #include <map>
 #include <string>
 #include <unordered_map>
+
+struct Mesh {
+  unsigned int VAO;
+  unsigned int VBO;
+  unsigned int EBO;
+  unsigned int indexCount;
+  std::vector<Texture *> textures;
+};
+
 class AssetManager {
 public:
   static Texture &loadTexture(const std::string &name, const char *path);
@@ -17,9 +27,12 @@ public:
                             const std::string &fragPath);
   static Shader &getShader(const std::string &name);
 
-private:
+  // Meshes
+  static Mesh &loadMesh(const std::string &name, const char *path);
+
   static std::map<std::string, Texture> textures;
   static std::map<std::string, Shader> shaders;
+  static std::map<std::string, Mesh> meshes;
 };
 
 #endif

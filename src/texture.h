@@ -11,6 +11,7 @@ public:
   unsigned int ID;
 
   Texture(const char *path);
+  Texture();
   void bind(int target) const;
 };
 

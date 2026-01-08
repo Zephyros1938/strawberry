@@ -44,8 +44,8 @@ Game::Game(int w, int h, const std::string &title)
 }
 
 void Game::setupScene() {
-  Mesh *mesh = &AssetManager::loadMesh(
-      "cheetah", "assets/models/rising_sun/rising_sun.obj");
+  Mesh *mesh =
+      &AssetManager::loadMesh("cheetah", "assets/models/cheetah/cheetah.obj");
 
   for (int i = -1; i < 2; i++) {
     Entity e = world.createEntity();

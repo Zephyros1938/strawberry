@@ -1,4 +1,6 @@
 #include "camera_system.hpp"
+#include <glm/ext/quaternion_geometric.hpp>
+#include <glm/geometric.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -26,16 +28,28 @@ void CameraSystem::update(ComponentStore<CameraComponent> &cameras,
     front.z = -cos(yawRad) * cos(pitchRad);
     front = glm::normalize(front);
 
+    // Calculate other vectors
+    glm::vec3 right = glm::normalize(glm::cross(front, camComp.worldUp));
+    if (glm::length(right) < 1e-8f) {
+      right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 0.0f, -1.0f)));
+    }
+
+    glm::vec3 up = glm::normalize(glm::cross(right, front));
+    camComp.front = front;
+    camComp.up = up;
+
     // Update platform Camera3D
     camera->position = pos;
     camera->front = front;
-    camera->up = camComp.up;
+    camera->up = up;
     camera->worldUp = camComp.worldUp;
 
     camera->zoom = camComp.fov;
-    camera->aspectRatio = camComp.aspectRatio;
+    // camera->aspectRatio = camComp.aspectRatio;
     camera->nearPlane = camComp.nearPlane;
     camera->farPlane = camComp.farPlane;
+    // camera->yaw = camComp.yaw;
+    // camera->pitch = camComp.pitch;
 
     break; // use first camera only
   }

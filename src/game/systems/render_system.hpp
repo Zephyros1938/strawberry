@@ -15,4 +15,5 @@ public:
 
 private:
   Shader *shader; // default, overidden by renderables
+  float clearColor[4] = {0.5, 0.5, 0.5, 1.0};
 };

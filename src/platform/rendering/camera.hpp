@@ -1,5 +1,4 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#pragma once
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -98,5 +97,3 @@ private:
     return glm::normalize(f);
   }
 };
-
-#endif

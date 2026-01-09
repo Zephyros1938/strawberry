@@ -4,6 +4,9 @@
 
 void RenderSystem::update(ComponentStore<Transform> &transforms,
                           ComponentStore<Renderable> &renderables) {
+  glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
   if (!shader)
     return;
   shader->use();
@@ -21,7 +24,7 @@ void RenderSystem::update(ComponentStore<Transform> &transforms,
     model = glm::rotate(model, transform.rotation.z, glm::vec3(0, 0, 1));
     model = glm::scale(model, transform.scale);
 
-    shader->setMat4("model", model);
+    shader->setMat4("uModel", model);
 
     // Bind textures if any
     for (size_t i = 0; i < renderable.textures.size(); ++i) {
@@ -30,8 +33,7 @@ void RenderSystem::update(ComponentStore<Transform> &transforms,
 
     // Draw
     glBindVertexArray(renderable.vao);
-    glDrawElements(renderable.drawMode, renderable.indexCount, GL_UNSIGNED_INT,
-                   0);
+    glDrawElements(GL_TRIANGLES, renderable.indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     // Unbind textures

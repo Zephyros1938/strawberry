@@ -1,5 +1,4 @@
-#ifndef SHADER_HPP
-#define SHADER_HPP
+#pragma once
 
 #include "glad/glad.h"
 #include "util/fileUtils.hpp"
@@ -95,5 +94,3 @@ private:
     return uniformNames[name];
   }
 };
-
-#endif

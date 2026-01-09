@@ -7,7 +7,7 @@ CXXFLAGS = -std=c++20 -O2 -Wall -Wextra \
 					 -I./include/glad \
            -DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK -MP -MMD
 
-LDFLAGS = -lglfw -lGL -lwayland-client -lxkbcommon -lpthread -ldl
+LDFLAGS = -lglfw3 -lGL -lwayland-client -lxkbcommon -lpthread -ldl
 
 # Updated SRCS to point to the new submodule locations
 SRCS = src/main.cpp src/platform/rendering/texture.cpp src/game/game.cpp src/game/systems/camera_system.cpp src/game/systems/render_system.cpp src/assets/assetManager.cpp \

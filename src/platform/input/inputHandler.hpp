@@ -1,42 +1,99 @@
 #pragma once
 
+#include "iostream"
 #include <GLFW/glfw3.h>
-#include <glm/ext/vector_float2.hpp>
+#include <glm/vec2.hpp>
 
-class MouseHandler {
+enum KeyState {
+  RELEASE = 0,
+  PRESS = 1,
+  HOLD = 2,
+};
+
+class InputHandler {
 public:
-  MouseHandler(GLFWwindow *win)
-      : window(win), lastX(0), lastY(0), scrollY(0), firstMouse(true) {}
+  InputHandler(GLFWwindow *win, bool m_Debug = false, bool k_Debug = false)
+      : window(win), m_Last(0), m_Scroll(0), m_FirstMouse(true),
+        m_Debug(m_Debug), k_Debug(k_Debug) {}
 
   glm::vec2 handleMouse(double xpos, double ypos) {
-    if (firstMouse) {
-      lastX = xpos;
-      lastY = ypos;
-      firstMouse = false;
+    if (m_Debug) {
+      std::cout << "Mouse Move: (" << xpos << "," << ypos << ")" << std::endl;
     }
-    float dx = xpos - lastX;
-    float dy = lastY - ypos;
-    lastX = xpos;
-    lastY = ypos;
-    delta = glm::vec2(dx, dy);
-    return delta;
+    if (m_FirstMouse) {
+      m_Last.x = xpos;
+      m_Last.y = ypos;
+      m_FirstMouse = false;
+    }
+    float dx = xpos - m_Last.x;
+    float dy = m_Last.y - ypos;
+    m_Last.x = xpos;
+    m_Last.y = ypos;
+    m_Delta = glm::vec2(dx, dy);
+    return m_Delta;
   }
 
-  glm::vec2 getMouseDelta() const { return delta; }
-  float getScroll() const { return scrollY; }
+  void handleScroll(double xpos, double ypos) {
+    m_Scroll = glm::vec2(xpos, ypos);
+  }
+
+  glm::vec2 getMouseDelta() const { return m_Delta; }
+  glm::vec2 getScroll() const { return m_Scroll; }
+
   void resetDelta() {
-    delta = glm::vec2(0.0f);
-    scrollY = 0.0f;
+    m_Delta = glm::vec2(0.0f);
+    m_Scroll = glm::vec2(0);
   }
 
-  bool isKeyPressed(int key) const {
-    return glfwGetKey(window, key) == GLFW_PRESS;
+  void setMouseLocked(bool v, GLFWwindow *window) {
+    glfwSetInputMode(window, GLFW_CURSOR,
+                     v ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    m_Locked = v;
   }
+
+  bool getMouseLocked() { return m_Locked; }
+
+  void setMouseSensitiviy(float v) { m_Sensitivity = v; }
+
+  float getMouseSensitivity() { return m_Sensitivity; }
+
+  void handleKeyboard(int key, int scancode, int action, int mods) {
+    if (k_Debug) {
+      std::cout << "Key: " << key << ":" << scancode << ":" << action << ":"
+                << mods << std::endl;
+    }
+
+    k_KeyStates[key] = (action == GLFW_RELEASE) ? KeyState::RELEASE
+                       : (k_KeyStates[key] == KeyState::PRESS ||
+                          k_KeyStates[key] == KeyState::HOLD)
+                           ? KeyState::HOLD
+                           : KeyState::PRESS;
+  }
+
+  bool isKeyDown(int k) {
+    return k_KeyStates[k] == KeyState::HOLD ||
+           k_KeyStates[k] == KeyState::PRESS;
+  }
+
+  bool isKeyPressed(int k) { return k_KeyStates[k] == KeyState::PRESS; }
+
+  bool isKeyHeld(int k) { return k_KeyStates[k] == KeyState::HOLD; }
+
+  bool isKeyUp(int k) { return k_KeyStates[k] == KeyState::RELEASE; }
+
+  KeyState getKey(int k) { return k_KeyStates[k]; }
 
 private:
   GLFWwindow *window;
-  float lastX, lastY;
-  float scrollY;
-  bool firstMouse;
-  glm::vec2 delta;
+
+  glm::dvec2 m_Last;
+  glm::vec2 m_Scroll;
+  glm::vec2 m_Delta;
+  bool m_FirstMouse;
+  bool m_Debug = false;
+  bool m_Locked = false;
+  float m_Sensitivity = 1.0;
+
+  KeyState k_KeyStates[348];
+  bool k_Debug = false;
 };

@@ -4,7 +4,7 @@
 
 struct CameraComponent {
   float fov = 75.0f; // Field of view in degrees
-  float aspectRatio = 16.0f / 9.0f;
+  float aspectRatio = 0.75f;
   float nearPlane = 0.01f;
   float farPlane = 100.0f;
 

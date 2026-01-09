@@ -38,7 +38,10 @@ public:
     glfwSetFramebufferSizeCallback(window, cb);
   }
 
-  void setKeyCallback(GLFWkeyfun cb) { glfwSetKeyCallback(window, cb); }
+  void setKeyCallback(GLFWkeyfun cb) {
+    std::cout << "Set key cb" << std::endl;
+    glfwSetKeyCallback(window, cb);
+  }
 
   void setWindowUserPointer(void *p) { glfwSetWindowUserPointer(window, p); }
 

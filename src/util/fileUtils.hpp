@@ -1,6 +1,4 @@
-#ifndef FILEUTIL_H
-#define FILEUTIL_H
-
+#pragma once
 #include <fstream>
 
 inline char *loadFileToCstr(const char *path) {
@@ -17,5 +15,3 @@ inline char *loadFileToCstr(const char *path) {
   buf[size] = '\0';
   return buf;
 }
-
-#endif

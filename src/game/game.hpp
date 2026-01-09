@@ -1,15 +1,19 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
-#include "assetManager.h"
-#include "camera.h"
-#include "ecs.h"
-#include "input/mouseHandler.h"
-#include "systems.h"
+#include "engine/ecs.hpp"
+#include "game/components/camera_component.hpp"
+#include "game/components/renderable.hpp"
+#include "game/components/transform.hpp"
+#include "game/systems/camera_system.hpp"
+#include "game/systems/gui_system.hpp"
+#include "game/systems/input_system.hpp"
+#include "game/systems/render_system.hpp"
+#include "platform/input/mouseHandler.hpp"
+#include "platform/rendering/camera.hpp"
+#include "platform/windowing/window.hpp"
+
 #include <GLFW/glfw3.h>
-#include <cstring>
-#include <iostream>
-#include <stdio.h>
+#include <string>
 
 class Game {
 public:
@@ -19,8 +23,6 @@ public:
   void run();
 
 private:
-  void initWindow();
-  void initGL();
   void processInput();
   void setupScene();
 
@@ -33,18 +35,25 @@ private:
   static void mouseScrollCallback(GLFWwindow *window, double x, double y);
 
   // Members
-  int width, height;
-  GLFWwindow *window;
+  Window window;
+
   Camera3D camera;
   MouseHandler mouseHandler;
+
+  // ECS
   World world;
+
+  // Components
+  ComponentStore<Transform> transforms;
+  ComponentStore<Renderable> renderables;
+  ComponentStore<CameraComponent> cameras;
+  ComponentStore<InputComponent> inputComponents;
+  // Systems
   RenderSystem renderSystem;
   InputSystem inputSystem;
-  GuiSystem guiSystem;
+  CameraSystem cameraSystem;
 
   float deltaTime;
   float lastFrame;
   float clearColor[4] = {0.2f, 0.3f, 0.3f, 1.0f};
 };
-
-#endif

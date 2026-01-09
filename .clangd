@@ -1,9 +1,0 @@
-CompileFlags:
-  Add: [
-    "-Isrc",
-    "-Iexternal/imgui",
-    "-Iexternal/imgui/backends",
-    "-Iexternal/tinyobjloader",
-    "-std=c++20",
-    "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK"
-  ]

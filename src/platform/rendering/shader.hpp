@@ -1,8 +1,8 @@
-#ifndef SHADER
-#define SHADER
+#ifndef SHADER_HPP
+#define SHADER_HPP
 
-#include "fileUtils.h"
 #include "glad/glad.h"
+#include "util/fileUtils.hpp"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -96,4 +96,4 @@ private:
   }
 };
 
-#endif // ! SHADER
+#endif

@@ -1,6 +1,6 @@
-#include "assetManager.h"
-#include "shader.h"
-#include "texture.h"
+#include "assetManager.hpp"
+#include "platform/rendering/shader.hpp"
+#include "platform/rendering/texture.hpp"
 #include <filesystem>
 #include <iostream>
 #define TINYOBJLOADER_IMPLEMENTATION

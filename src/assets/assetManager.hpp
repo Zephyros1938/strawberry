@@ -1,8 +1,8 @@
-#ifndef ASSET_MANAGER_H
-#define ASSET_MANAGER_H
+#ifndef ASSET_MANAGER_HPP
+#define ASSET_MANAGER_HPP
 
-#include "shader.h"
-#include "texture.h"
+#include "platform/rendering/shader.hpp"
+#include "platform/rendering/texture.hpp"
 #include "tiny_obj_loader.h"
 #include <map>
 #include <string>

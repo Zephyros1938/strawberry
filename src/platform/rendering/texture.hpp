@@ -1,10 +1,7 @@
-#ifndef TEXTURE
-#define TEXTURE
+#pragma once
 
 #include "glad/glad.h"
 #include <stb/stb_image.h>
-
-#include <iostream>
 
 class Texture {
 public:
@@ -14,5 +11,3 @@ public:
   Texture();
   void bind(int target) const;
 };
-
-#endif // !TEXTURE

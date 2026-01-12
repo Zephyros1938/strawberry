@@ -62,4 +62,5 @@ private:
 
   float deltaTime;
   float lastFrame;
+  float totalTime;
 };

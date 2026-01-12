@@ -6,10 +6,12 @@
 #include "game/components/transform.hpp"
 #include "game/systems/camera_system.hpp"
 #include "game/systems/render_system.hpp"
+#include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "platform/gui/guiHandler.hpp"
 #include "platform/input/inputHandler.hpp"
 #include "platform/rendering/uniform_buffer_management.hpp"
+#include "util/logger.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <glm/ext/matrix_float4x4.hpp>
@@ -21,19 +23,24 @@
 Game::Game(int width, int height, const std::string &title)
     : window(width, height, title), inputHandler(false, false),
       uniformBufferManager(256, 0), guiHandler(window.getGLFWwindow()),
-      cameraSystem(&camera), shaderSystem(&camera) {}
+      cameraSystem(&camera), shaderSystem(&camera), totalTime(0.0) {}
 
 void Game::run() {
   setupScene();
-  std::cout << "running\n";
+  Logger::Info("Running");
   ImGuiIO &io = ImGui::GetIO();
 
   io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+
+  totalTime = 0.0;
 
   while (!window.shouldClose()) {
     float currentFrame = window.getTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
+    if (deltaTime > 0 && deltaTime < 1.0f) {
+      totalTime += deltaTime;
+    }
 
     int winW, winH;
     int fbW, fbH;
@@ -46,6 +53,7 @@ void Game::run() {
     window.pollEvents();
     processInput();
     inputHandler.updateKeyboard();
+    inputHandler.updateMouseButton();
 
     cameraSystem.update(cameras, transforms);
 
@@ -53,10 +61,56 @@ void Game::run() {
     glm::mat4 cameraViewMatrix = camera.getViewMatrix();
     uniformBufferManager.setData("uCameraView", &cameraViewMatrix);
     uniformBufferManager.setData("uCameraProjection", &cameraProjectionMatrix);
+    uniformBufferManager.setData("uDeltatime", &deltaTime);
+    uniformBufferManager.setData("uTime", &totalTime);
 
     guiHandler.NewFrame();
-    ImGui::Begin("test");
-    ImGui::Text("aaaa");
+    // ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+    ButtonState *bs = inputHandler.getMousePointerState();
+
+    ImGui::Begin("Debugging");
+
+    // --- Performance & Camera ---
+    ImGui::Text("FPS: %.2f", 1.0f / deltaTime);
+    ImGui::Text("Time: %.2f", totalTime);
+    ImGui::Text("GLFW Time: %.2f", window.getTime());
+
+    ImGui::SeparatorText("Camera System");
+    ImGui::Text("MOUSE: %i%i%i%i%i%i%i%i", bs[0], bs[1], bs[2], bs[3], bs[4],
+                bs[5], bs[6], bs[7]);
+    ImGui::Text("POSIT: x%.2f y%.2f z%.2f", camera.position.x,
+                camera.position.y, camera.position.z);
+    ImGui::Text("ROTAT: x%.2f y%.2f z%.2f", camera.front.x, camera.front.y,
+                camera.front.z);
+
+    // --- Logs Section ---
+    ImGui::SeparatorText("Logs");
+
+    // Optional: Add a button to clear logs if your Logger supports it
+    if (ImGui::Button("Clear Logs")) {
+      Logger::Clear();
+    }
+
+    // BeginChild creates the scrollable area
+    // "LogRegion" is an ID, ImVec2(0, 150) sets width to auto and height to
+    // 150px
+    ImGui::BeginChild("LogRegion", ImVec2(0, 150), true,
+                      ImGuiWindowFlags_HorizontalScrollbar);
+
+    auto allLogs = Logger::GetLogs();
+    int count = Logger::GetLogCount();
+
+    for (int i = 0; i < count; i++) {
+      ImGui::TextUnformatted(allLogs[i]);
+    }
+
+    // Auto-scroll to bottom if new logs are added
+    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+      ImGui::SetScrollHereY(1.0f);
+    }
+
+    ImGui::EndChild();
+
     ImGui::End();
     guiHandler.Finalize();
     renderSystem.update(transforms, renderables);
@@ -95,6 +149,8 @@ void Game::setupScene() {
   uniformBufferManager.registerUniform("uCameraView", sizeof(glm::mat4), 16);
   uniformBufferManager.registerUniform("uCameraProjection", sizeof(glm::mat4),
                                        16);
+  uniformBufferManager.registerUniform("uDeltatime", sizeof(float), 4);
+  uniformBufferManager.registerUniform("uTime", sizeof(float), 4);
 }
 
 void Game::framebufferSizeCallback(GLFWwindow *window, int width, int height) {
@@ -112,11 +168,12 @@ void Game::keyCallback(GLFWwindow *window, int key, int scancode, int action,
   Game *game = static_cast<Game *>(glfwGetWindowUserPointer(window));
   if (!game)
     return;
-
-  game->inputHandler.handleKeyboard(key, scancode, action, mods);
-
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(game->window.getGLFWwindow(), true);
+  if (game->guiHandler.GetWantMouseCapture())
+    return;
+
+  game->inputHandler.handleKeyboard(key, scancode, action, mods);
 }
 
 void Game::cursorPosCallback(GLFWwindow *window, double x, double y) {
@@ -127,8 +184,10 @@ void Game::cursorPosCallback(GLFWwindow *window, double x, double y) {
     return;
   if (!game->inputHandler.getMouseLocked())
     return;
+  if (game->guiHandler.GetWantMouseCapture())
+    return;
 
-  glm::vec2 d = game->inputHandler.handleMouse(x, y) *
+  glm::vec2 d = game->inputHandler.handleMouseMove(x, y) *
                 game->inputHandler.getMouseSensitivity();
   for (auto &[entity, camComp] : game->cameras.all()) {
     camComp.pitch += d.y;
@@ -149,6 +208,8 @@ void Game::scrollCallback(GLFWwindow *window, double x, double y) {
     return;
   if (!game->inputHandler.getMouseLocked())
     return;
+  if (game->guiHandler.GetWantMouseCapture())
+    return;
 
   game->inputHandler.handleScroll(x, y);
   for (auto &[entity, camComp] : game->cameras.all()) {
@@ -164,6 +225,8 @@ void Game::mouseButtonCallback(GLFWwindow *window, int button, int action,
   Game *game = static_cast<Game *>(glfwGetWindowUserPointer(window));
   if (!game)
     return;
+
+  game->inputHandler.handleMouseButton(button, action, mods);
 }
 
 void Game::processInput() {

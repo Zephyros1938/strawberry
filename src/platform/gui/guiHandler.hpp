@@ -14,6 +14,9 @@ public:
     ImGuiIO &io = ImGui::GetIO();
 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    io.ConfigFlags |=
+        ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport (Optional)
 
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, false);
@@ -37,4 +40,6 @@ public:
   void End() { ImGui::End(); }
 
   void Render() { ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); }
+
+  bool GetWantMouseCapture() { return ImGui::GetIO().WantCaptureMouse; }
 };

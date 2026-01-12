@@ -1,6 +1,7 @@
 #include "assetManager.hpp"
 #include "platform/rendering/shader.hpp"
 #include "platform/rendering/texture.hpp"
+#include "util/logger.hpp"
 #include <filesystem>
 #include <iostream>
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -8,8 +9,7 @@
 
 Texture &AssetManager::loadTexture(const std::string &name, const char *path) {
   auto it = textures.find(name);
-  std::cout << "Loading texture \"" << name << "\" (" << path << ")"
-            << std::endl;
+  Logger::Info("Loading texture \"%s\" (%s)", name.c_str(), path);
 
   if (it == textures.end()) {
     auto [newIt, success] = textures.emplace(name, Texture(path));
@@ -27,7 +27,7 @@ Shader &AssetManager::loadShader(const std::string &name,
                                  const std::string &vertPath,
                                  const std::string &fragPath) {
   auto it = shaders.find(name);
-  std::cout << "Loading shader \"" << name << "\"" << std::endl;
+  Logger::Info("Loading shader \"%s\"", name.c_str());
 
   if (it == shaders.end()) {
     auto [newIt, success] =
@@ -42,7 +42,7 @@ Shader &AssetManager::getShader(const std::string &name) {
 }
 
 Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
-  std::cout << "Loading mesh \"" << name << "\" (" << path << ")" << std::endl;
+  Logger::Info("Loading mesh \"%s\" (%s)", name.c_str(), path);
   if (meshes.find(name) != meshes.end())
     return meshes[name];
 
@@ -54,7 +54,7 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
   std::string objDir = std::filesystem::path(path).parent_path().string() + "/";
   if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path,
                         objDir.c_str())) {
-    std::cerr << "Failed to load OBJ: " << err << std::endl;
+    Logger::Error("Failed to load OBJ:\n%s", err.c_str());
     exit(-1);
   }
 
@@ -118,14 +118,20 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
   for (const auto &mat : materials) {
     std::cout << "\tFound material \"" << mat.name << "\", diffuse texname: \""
               << mat.diffuse_texname << "\"\n";
-    if (!mat.diffuse_texname.empty()) {
-      std::string objDir =
-          std::filesystem::path(path).parent_path().string() + "/";
-      std::string texPath = objDir + mat.diffuse_texname;
-      std::cout << "\tLoading texture file: " << texPath << std::endl;
-      Texture *tex = &AssetManager::loadTexture(mat.name, texPath.c_str());
-      meshTextures.push_back(tex);
-    }
+    Logger::Info("\tFound material \"%s\"\n\t\tDiff: \"%s\"\n\t\tNorm: "
+                 "\"%s\"\n\t\tSpec: \"%s\"",
+                 name.c_str(), mat.diffuse_texname.c_str(),
+                 mat.normal_texname.c_str(), mat.specular_texname.c_str());
+    for (auto texture :
+         {mat.diffuse_texname, mat.normal_texname, mat.specular_texname}) {
+      if (!texture.empty()) {
+        std::string objDir =
+            std::filesystem::path(path).parent_path().string() + "/";
+        std::string texPath = objDir + texture;
+        Texture *tex = &AssetManager::loadTexture(mat.name, texPath.c_str());
+        meshTextures.push_back(tex);
+      }
+    };
   }
 
   Mesh mesh{VAO, VBO, EBO, static_cast<unsigned int>(indices.size()),

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "util/logger.hpp"
 #include <glad/glad.h>
-#include <iostream>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -31,8 +31,8 @@ public:
     sizes.emplace(name, dataSize);
     nextOffset = alignedOffset + dataSize;
 
-    std::cout << "Uniform \"" << name << "\"  registered at " << alignedOffset
-              << std::endl;
+    Logger::Info("Uniform \"%s\" registered at 0x%X", name.c_str(),
+                 alignedOffset);
   }
 
   void setData(const std::string &name, const void *data) {

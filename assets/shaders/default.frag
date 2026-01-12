@@ -6,12 +6,6 @@ in vec2 TexCoord;
 
 uniform sampler2D texture1;
 
-/* Allowed but not required:
-uniform mat4 uCameraView;
-uniform mat4 uCameraProjection;
-uniform mat4 uModel;
-*/
-
 void main()
 {
   // Hard-coded light direction (world space)

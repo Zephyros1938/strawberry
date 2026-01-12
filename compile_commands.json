@@ -18,8 +18,31 @@
       "src/game/game.o",
       "src/game/game.cpp"
     ],
-    "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/src/game/game.cpp",
-    "output": "/home/zeph/gamedev/strawberry/src/game/game.o"
+    "directory": "/home/zeph/Coding/GAMES/strawberry",
+    "file": "/home/zeph/Coding/GAMES/strawberry/src/game/game.cpp",
+    "output": "/home/zeph/Coding/GAMES/strawberry/src/game/game.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-I./include",
+      "-I./src",
+      "-I./external/imgui",
+      "-I./external/imgui/backends",
+      "-I./external/tinyobjloader",
+      "-I./include/glad",
+      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
+      "-c",
+      "-o",
+      "src/util/utilStatics.o",
+      "src/util/utilStatics.cpp"
+    ],
+    "directory": "/home/zeph/Coding/GAMES/strawberry",
+    "file": "/home/zeph/Coding/GAMES/strawberry/src/util/utilStatics.cpp",
+    "output": "/home/zeph/Coding/GAMES/strawberry/src/util/utilStatics.o"
   }
 ]

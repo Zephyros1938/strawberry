@@ -1,5 +1,4 @@
-#ifndef ASSET_MANAGER_HPP
-#define ASSET_MANAGER_HPP
+#pragma once
 
 #include "platform/rendering/shader.hpp"
 #include "platform/rendering/texture.hpp"
@@ -37,5 +36,3 @@ public:
   static std::map<std::string, Shader> shaders;
   static std::map<std::string, Mesh> meshes;
 };
-
-#endif

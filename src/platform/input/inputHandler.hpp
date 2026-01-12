@@ -12,9 +12,9 @@ enum KeyState {
 
 class InputHandler {
 public:
-  InputHandler(GLFWwindow *win, bool m_Debug = false, bool k_Debug = false)
-      : window(win), m_Last(0), m_Scroll(0), m_FirstMouse(true),
-        m_Debug(m_Debug), k_Debug(k_Debug) {}
+  InputHandler(bool m_Debug = false, bool k_Debug = false)
+      : m_Last(0), m_Scroll(0), m_FirstMouse(true), m_Debug(m_Debug),
+        k_Debug(k_Debug) {}
 
   glm::vec2 handleMouse(double xpos, double ypos) {
     if (m_Debug) {
@@ -49,6 +49,7 @@ public:
     glfwSetInputMode(window, GLFW_CURSOR,
                      v ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
     m_Locked = v;
+    m_FirstMouse = v;
   }
 
   bool getMouseLocked() { return m_Locked; }
@@ -63,11 +64,11 @@ public:
                 << mods << std::endl;
     }
 
-    k_KeyStates[key] = (action == GLFW_RELEASE) ? KeyState::RELEASE
-                       : (k_KeyStates[key] == KeyState::PRESS ||
-                          k_KeyStates[key] == KeyState::HOLD)
-                           ? KeyState::HOLD
-                           : KeyState::PRESS;
+    if (action == GLFW_PRESS) {
+      k_KeyStates[key] = KeyState::PRESS;
+    } else if (action == GLFW_RELEASE) {
+      k_KeyStates[key] = KeyState::RELEASE;
+    }
   }
 
   bool isKeyDown(int k) {
@@ -83,9 +84,15 @@ public:
 
   KeyState getKey(int k) { return k_KeyStates[k]; }
 
-private:
-  GLFWwindow *window;
+  void updateKeyboard() {
+    for (int i = 0; i < 348; ++i) {
+      if (k_KeyStates[i] == KeyState::PRESS) {
+        k_KeyStates[i] = KeyState::HOLD;
+      }
+    }
+  }
 
+private:
   glm::dvec2 m_Last;
   glm::vec2 m_Scroll;
   glm::vec2 m_Delta;

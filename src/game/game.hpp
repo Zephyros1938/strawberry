@@ -8,8 +8,10 @@
 #include "game/systems/gui_system.hpp"
 #include "game/systems/render_system.hpp"
 #include "game/systems/shader_system.hpp"
+#include "platform/gui/guiHandler.hpp"
 #include "platform/input/inputHandler.hpp"
 #include "platform/rendering/camera.hpp"
+#include "platform/rendering/uniform_buffer_management.hpp"
 #include "platform/windowing/window.hpp"
 
 #include <GLFW/glfw3.h>
@@ -33,6 +35,8 @@ private:
                           int mods);
   static void mouseMoveCallback(GLFWwindow *window, double x, double y);
   static void mouseScrollCallback(GLFWwindow *window, double x, double y);
+  static void mouseButtonCallback(GLFWwindow *window, int button, int action,
+                                  int mods);
   static void cursorPosCallback(GLFWwindow *w, double x, double y);
   static void scrollCallback(GLFWwindow *w, double x, double y);
 
@@ -41,6 +45,8 @@ private:
 
   Camera3D camera = Camera3D();
   InputHandler inputHandler;
+  UniformBufferManager uniformBufferManager;
+  GuiHandler guiHandler;
 
   // ECS
   World world;

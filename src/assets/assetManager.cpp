@@ -3,7 +3,6 @@
 #include "platform/rendering/texture.hpp"
 #include "util/logger.hpp"
 #include <filesystem>
-#include <iostream>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
@@ -116,8 +115,6 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
 
   std::vector<Texture *> meshTextures;
   for (const auto &mat : materials) {
-    std::cout << "\tFound material \"" << mat.name << "\", diffuse texname: \""
-              << mat.diffuse_texname << "\"\n";
     Logger::Info("\tFound material \"%s\"\n\t\tDiff: \"%s\"\n\t\tNorm: "
                  "\"%s\"\n\t\tSpec: \"%s\"",
                  name.c_str(), mat.diffuse_texname.c_str(),
@@ -128,8 +125,7 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
         std::string objDir =
             std::filesystem::path(path).parent_path().string() + "/";
         std::string texPath = objDir + texture;
-        Texture *tex =
-            &AssetManager::loadTexture(name + ":" + mat.name, texPath.c_str());
+        Texture *tex = &AssetManager::loadTexture(texPath, texPath.c_str());
         meshTextures.push_back(tex);
       }
     };

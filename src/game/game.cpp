@@ -17,7 +17,6 @@
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 #include <string>
 
 Game::Game(int width, int height, const std::string &title)
@@ -33,6 +32,7 @@ void Game::run() {
   io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
   totalTime = 0.0;
+  static Entity selectedEID = 0;
 
   while (!window.shouldClose()) {
     float currentFrame = window.getTime();
@@ -79,23 +79,14 @@ void Game::run() {
     ImGui::Text("ROTAT: x%.2f y%.2f z%.2f", camera.front.x, camera.front.y,
                 camera.front.z);
 
-    // --- Logs Section ---
     ImGui::SeparatorText("Logs");
-
-    // Optional: Add a button to clear logs if your Logger supports it
     if (ImGui::Button("Clear Logs")) {
       Logger::Clear();
     }
-
-    // BeginChild creates the scrollable area
-    // "LogRegion" is an ID, ImVec2(0, 150) sets width to auto and height to
-    // 150px
     ImGui::BeginChild("LogRegion", ImVec2(0, 150), true,
                       ImGuiWindowFlags_HorizontalScrollbar);
-
     auto allLogs = Logger::GetLogs();
     int count = Logger::GetLogCount();
-
     for (int i = 0; i < count; i++) {
       ImGui::TextUnformatted(allLogs[i]);
     }
@@ -108,21 +99,77 @@ void Game::run() {
     ImGui::EndChild();
 
     ImGui::End();
-    ImGui::Begin("Editor");
+    ImGui::Begin("Asset Manager Info");
+
+    ImGui::BeginChild("Meshes");
+
+    auto allMeshes = AssetManager::meshes;
+    for (auto [meshName, mesh] : allMeshes) {
+      ImGui::Text("%s : %i", meshName.c_str(), mesh.VAO);
+      for (auto t : mesh.textures) {
+        ImGui::Text("%i", t->ID);
+        ImGui::Image(ImTextureRef(t->ID), ImVec2(64, 64));
+      }
+    }
+
+    ImGui::EndChild();
 
     ImGui::BeginChild("Textures", ImVec2(0, 300), true,
                       ImGuiWindowFlags_HorizontalScrollbar);
 
     auto allTextures = AssetManager::textures;
-    count = AssetManager::textures.size();
 
-    for (auto [n, y] : allTextures) {
-      ImGui::Text("%s", n.c_str());
-      ImGui::Image(ImTextureRef(y.ID),
-                   ImVec2(y.width ? y.width : 256, y.height ? y.height : 256));
+    for (auto [texName, texture] : allTextures) {
+      ImGui::Text("%s", texName.c_str());
+      ImGui::Image(ImTextureRef(texture.ID),
+                   ImVec2(texture.width ? texture.width : 256,
+                          texture.height ? texture.height : 256));
     }
 
     ImGui::EndChild();
+    ImGui::End();
+
+    ImGui::Begin("Editor");
+
+    // NO LOOP HERE
+    if (ImGui::BeginCombo(
+            "Select Entity",
+            selectedEID == 0 ? "None" : std::to_string(selectedEID).c_str())) {
+      // THE LOOP GOES INSIDE: This populates the list items
+      for (unsigned int e = 1; e <= world.getNextEntityId(); e++) {
+        if (!transforms.has(e))
+          continue;
+
+        bool isSelected = (selectedEID == e);
+        if (ImGui::Selectable(std::to_string(e).c_str(), isSelected)) {
+          selectedEID = e;
+        }
+
+        if (isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+
+    ImGui::Separator();
+
+    // Now show the sliders for the one entity we picked
+    if (selectedEID != 0 && transforms.has(selectedEID)) {
+      Transform &t = transforms.get(selectedEID);
+
+      names.has(selectedEID)
+          ? ImGui::Text("Editing Entity \"%s\" (EID: %i)",
+                        names.get(selectedEID).c_str(), selectedEID)
+          : ImGui::Text("Editing Entity <noname> (EID: %i)", selectedEID);
+      ImGui::DragFloat3("Position", &t.position.x, 0.1f);
+      ImGui::DragFloat3("Rotation", &t.rotation.x, 0.5f);
+      ImGui::DragFloat3("Scale", &t.scale.x, 0.05f);
+
+    } else {
+      ImGui::Text("Please select an entity from the dropdown.");
+    }
+
     ImGui::End();
 
     guiHandler.Finalize();
@@ -149,7 +196,7 @@ void Game::setupScene() {
       {-3, "assets/models/cheetah/cheetah.obj"},
       {0, "assets/models/cheetah1/cheetah.obj"},
       {3, "assets/models/cheetah/cheetah.obj"},
-      {6, "assets/models/rising_sun/rising_sun.obj"}};
+      {6, "assets/models/arrow/arrow.obj"}};
 
   for (auto [px, name] : coolModels) {
     Mesh m = AssetManager::loadMesh(name, name.c_str());
@@ -161,6 +208,17 @@ void Game::setupScene() {
     transforms.add(e, et);
     renderables.add(e, r);
   }
+
+  Mesh m = AssetManager::loadMesh("floor", "assets/models/cheetah/cheetah.obj");
+  Entity e = world.createEntity();
+  Renderable r = Renderable(m.VAO, m.indexCount, 0x0004, m.textures,
+                            &AssetManager::getShader("default"));
+
+  Transform et = Transform{};
+  et.scale = {10, 1, 10};
+  et.position.y = -5;
+  transforms.add(e, et);
+  renderables.add(e, r);
 
   Entity ce = world.createEntity();
   CameraComponent cc = CameraComponent();

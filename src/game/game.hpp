@@ -55,6 +55,7 @@ private:
   ComponentStore<Transform> transforms;
   ComponentStore<Renderable> renderables;
   ComponentStore<CameraComponent> cameras;
+  ComponentStore<std::string> names;
   // Systems
   RenderSystem renderSystem;
   CameraSystem cameraSystem;

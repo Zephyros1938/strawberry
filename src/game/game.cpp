@@ -42,14 +42,6 @@ void Game::run() {
       totalTime += deltaTime;
     }
 
-    int winW, winH;
-    int fbW, fbH;
-    glfwGetWindowSize(window.getGLFWwindow(), &winW, &winH);
-    glfwGetFramebufferSize(window.getGLFWwindow(), &fbW, &fbH);
-
-    io.DisplaySize = ImVec2((float)winW, (float)winH);
-    io.DisplayFramebufferScale = ImVec2(fbW / (float)winW, fbH / (float)winH);
-
     window.pollEvents();
     processInput();
     inputHandler.updateKeyboard();
@@ -65,6 +57,7 @@ void Game::run() {
     uniformBufferManager.setData("uTime", &totalTime);
 
     guiHandler.NewFrame();
+
     // ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
     ButtonState *bs = inputHandler.getMousePointerState();
 
@@ -74,6 +67,9 @@ void Game::run() {
     ImGui::Text("FPS: %.2f", 1.0f / deltaTime);
     ImGui::Text("Time: %.2f", totalTime);
     ImGui::Text("GLFW Time: %.2f", window.getTime());
+    int wx, wy;
+    glfwGetWindowSize(window.getGLFWwindow(), &wx, &wy);
+    ImGui::Text("Size: %ix%i", wx, wy);
 
     ImGui::SeparatorText("Camera System");
     ImGui::Text("MOUSE: %i%i%i%i%i%i%i%i", bs[0], bs[1], bs[2], bs[3], bs[4],
@@ -112,6 +108,23 @@ void Game::run() {
     ImGui::EndChild();
 
     ImGui::End();
+    ImGui::Begin("Editor");
+
+    ImGui::BeginChild("Textures", ImVec2(0, 300), true,
+                      ImGuiWindowFlags_HorizontalScrollbar);
+
+    auto allTextures = AssetManager::textures;
+    count = AssetManager::textures.size();
+
+    for (auto [n, y] : allTextures) {
+      ImGui::Text("%s", n.c_str());
+      ImGui::Image(ImTextureRef(y.ID),
+                   ImVec2(y.width ? y.width : 256, y.height ? y.height : 256));
+    }
+
+    ImGui::EndChild();
+    ImGui::End();
+
     guiHandler.Finalize();
     renderSystem.update(transforms, renderables);
     guiHandler.Render();
@@ -132,13 +145,22 @@ void Game::setupScene() {
   renderSystem = RenderSystem(&AssetManager::loadShader(
       "default", "assets/shaders/default.vert", "assets/shaders/default.frag"));
 
-  Mesh m = AssetManager::loadMesh("test", "assets/models/cheetah/cheetah.obj");
-  Entity e = world.createEntity();
-  Renderable r = Renderable{m.VAO, m.indexCount, 0x0004, m.textures,
-                            &AssetManager::getShader("default")};
-  Transform et = Transform{};
-  transforms.add(e, et);
-  renderables.add(e, r);
+  std::map<int, std::string> coolModels = {
+      {-3, "assets/models/cheetah/cheetah.obj"},
+      {0, "assets/models/cheetah1/cheetah.obj"},
+      {3, "assets/models/cheetah/cheetah.obj"},
+      {6, "assets/models/rising_sun/rising_sun.obj"}};
+
+  for (auto [px, name] : coolModels) {
+    Mesh m = AssetManager::loadMesh(name, name.c_str());
+    Entity e = world.createEntity();
+    Renderable r = Renderable{m.VAO, m.indexCount, 0x0004, m.textures,
+                              &AssetManager::getShader("default")};
+    Transform et = Transform{};
+    et.position.x = px;
+    transforms.add(e, et);
+    renderables.add(e, r);
+  }
 
   Entity ce = world.createEntity();
   CameraComponent cc = CameraComponent();

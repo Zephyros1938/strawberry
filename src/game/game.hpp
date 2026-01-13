@@ -49,7 +49,7 @@ private:
   GuiHandler guiHandler;
 
   // ECS
-  World world;
+  ECS world;
 
   // Components
   ComponentStore<Transform> transforms;

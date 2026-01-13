@@ -1,7 +1,7 @@
 #pragma once
 #include "glad/glad.h"
+#include "util/logger.hpp"
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -9,18 +9,17 @@ class Window {
 public:
   Window(int width, int height, const std::string &title)
       : width(width), height(height), title(title) {
-    std::cout << "Init GLFW\n";
+    Logger::Info("Init GLFW");
     initGLFW();
-    std::cout << "Create Window\n";
+    Logger::Info("Create window");
     createWindow();
-    std::cout << "Init GLAD\n";
+    Logger::Info("Init OpenGL");
     initGLAD();
-    std::cout << "Set up OpenGL State\n";
+    Logger::Info("Finalize OpenGL state");
     setupOpenGLState();
   }
 
   ~Window() {
-    std::cout << "Destroy Window";
     if (window)
       glfwDestroyWindow(window);
     glfwTerminate();
@@ -38,10 +37,7 @@ public:
     glfwSetFramebufferSizeCallback(window, cb);
   }
 
-  void setKeyCallback(GLFWkeyfun cb) {
-    std::cout << "Set key cb" << std::endl;
-    glfwSetKeyCallback(window, cb);
-  }
+  void setKeyCallback(GLFWkeyfun cb) { glfwSetKeyCallback(window, cb); }
 
   void setWindowUserPointer(void *p) { glfwSetWindowUserPointer(window, p); }
 
@@ -92,5 +88,7 @@ private:
   void setupOpenGLState() {
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
+    // glCullFace(GL_FRONT_AND_BACK);
+    // glFrontFace(GL_CW);
   }
 };

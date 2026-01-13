@@ -128,7 +128,8 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
         std::string objDir =
             std::filesystem::path(path).parent_path().string() + "/";
         std::string texPath = objDir + texture;
-        Texture *tex = &AssetManager::loadTexture(mat.name, texPath.c_str());
+        Texture *tex =
+            &AssetManager::loadTexture(name + ":" + mat.name, texPath.c_str());
         meshTextures.push_back(tex);
       }
     };

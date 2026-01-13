@@ -6,7 +6,7 @@
 
 using Entity = uint32_t;
 
-class World {
+class ECS {
 public:
   Entity createEntity() { return nextEntity++; }
 

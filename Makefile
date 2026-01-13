@@ -1,16 +1,29 @@
 CXX = g++
-# Added new include paths for the submodules
+
+# --- OS Detection Logic ---
+# Check if "Ubuntu" exists in /etc/os-release
+IS_UBUNTU := $(shell grep -i ubuntu /etc/os-release 2>/dev/null)
+
+ifeq ($(IS_UBUNTU),)
+    GLFW_LIB = -lglfw
+else
+    GLFW_LIB = -lglfw3
+endif
+# --------------------------
+
 CXXFLAGS = -std=c++20 -O2 -Wall -Wextra \
            -I./include -I./src \
            -I./external/imgui -I./external/imgui/backends \
            -I./external/tinyobjloader \
-					 -I./include/glad \
+           -I./include/glad \
            -DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK -MP -MMD
 
-LDFLAGS = -lglfw3 -lGL -lwayland-client -lxkbcommon -lpthread -ldl
+# Use the dynamic GLFW_LIB variable here
+LDFLAGS = $(GLFW_LIB) -lGL -lwayland-client -lxkbcommon -lpthread -ldl
 
-# Updated SRCS to point to the new submodule locations
-SRCS = src/main.cpp src/platform/rendering/texture.cpp src/game/game.cpp src/game/systems/camera_system.cpp src/game/systems/render_system.cpp src/assets/assetManager.cpp src/util/utilStatics.cpp\
+SRCS = src/main.cpp src/platform/rendering/texture.cpp src/game/game.cpp \
+       src/game/systems/camera_system.cpp src/game/systems/render_system.cpp \
+       src/assets/assetManager.cpp src/util/utilStatics.cpp \
        include/glad/glad.c \
        external/imgui/imgui.cpp \
        external/imgui/imgui_draw.cpp \
@@ -20,14 +33,13 @@ SRCS = src/main.cpp src/platform/rendering/texture.cpp src/game/game.cpp src/gam
        external/imgui/backends/imgui_impl_glfw.cpp \
        external/imgui/backends/imgui_impl_opengl3.cpp 
 
-# Convert source file names to object file names (.o)
 OBJS = $(addsuffix .o, $(basename $(SRCS)))
 DEPS = $(OBJS:.o=.d)
 
 all: app.out
 
-app: $(OBJS)
-	$(CXX) $(OBJS) -o app $(LDFLAGS)
+app.out: $(OBJS)
+	$(CXX) $(OBJS) -o app.out $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -38,4 +50,4 @@ app: $(OBJS)
 -include $(DEPS)
 
 clean:
-	rm -f $(OBJS) $(DEPS) app
+	rm -f $(OBJS) $(DEPS) app.out

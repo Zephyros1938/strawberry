@@ -1,6 +1,6 @@
 #include "texture.hpp"
+#include "util/logger.hpp"
 #define STB_IMAGE_IMPLEMENTATION
-#include <iostream>
 #include <stb/stb_image.h>
 
 Texture::Texture(const char *path) {
@@ -35,6 +35,8 @@ Texture::Texture(const char *path) {
   if (data) {
     // Calculate the number of bytes in one row
     int bytesPerRow = width * nrChannels;
+    this->width = width;
+    this->height = height;
 
     // If the row size is not a multiple of 4, tell OpenGL to use 1-byte
     // alignment
@@ -47,7 +49,7 @@ Texture::Texture(const char *path) {
                  GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
   } else {
-    std::cerr << "Failed to load texture <" << path << ">" << std::endl;
+    Logger::Error("Failed to load texture <%s>", path);
   }
 
   stbi_image_free(data);

@@ -6,6 +6,7 @@
 class Texture {
 public:
   unsigned int ID;
+  int width, height;
 
   Texture(const char *path);
   Texture();

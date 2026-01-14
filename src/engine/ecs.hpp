@@ -9,7 +9,6 @@ using Entity = uint32_t;
 class ECS {
 public:
   Entity createEntity() { return nextEntity++; }
-
   Entity getNextEntityId() { return nextEntity; }
 
 private:

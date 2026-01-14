@@ -10,6 +10,7 @@ void CameraSystem::update(ComponentStore<CameraComponent> &cameras,
     return;
 
   // For simplicity, use the first camera entity
+
   for (auto &[entity, camComp] : cameras.all()) {
     glm::vec3 pos = camComp.position;
 

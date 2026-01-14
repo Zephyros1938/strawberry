@@ -53,6 +53,13 @@ public:
     glfwSetScrollCallback(window, cb);
   }
 
+  void setSize(int width, int height) {
+    this->width = width;
+    this->height = height;
+  }
+  int getWidth() { return width; }
+  int getHeight() { return height; }
+
   float getTime() { return glfwGetTime(); }
 
 private:

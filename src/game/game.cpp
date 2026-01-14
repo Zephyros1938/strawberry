@@ -16,7 +16,9 @@
 #include <algorithm>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
+#include <glm/geometric.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <math/raycast.hpp>
 #include <string>
 
 Game::Game(int width, int height, const std::string &title)
@@ -191,18 +193,22 @@ void Game::setupScene() {
 
   renderSystem = RenderSystem(&AssetManager::loadShader(
       "default", "assets/shaders/default.vert", "assets/shaders/default.frag"));
+  AssetManager::loadShader("simple", "assets/shaders/simple.vert",
+                           "assets/shaders/simple.frag");
 
-  std::map<int, std::string> coolModels = {
-      {-3, "assets/models/cheetah/cheetah.obj"},
-      {0, "assets/models/cheetah1/cheetah.obj"},
-      {3, "assets/models/cheetah/cheetah.obj"},
-      {6, "assets/models/arrow/arrow.obj"}};
+  std::map<int, std::vector<std::string>> coolModels = {
+      {-3, {"assets/models/cheetah/cheetah.obj"}},
+      {0, {"assets/models/cheetah1/cheetah.obj"}},
+      {3, {"assets/models/cheetah/cheetah.obj"}},
+      {6, {"assets/editor/models/xyzArrow/model.obj", "simple"}}};
 
   for (auto [px, name] : coolModels) {
-    Mesh m = AssetManager::loadMesh(name, name.c_str());
+    Mesh m = AssetManager::loadMesh(name[0], name[0].c_str());
     Entity e = world.createEntity();
-    Renderable r = Renderable{m.VAO, m.indexCount, 0x0004, m.textures,
-                              &AssetManager::getShader("default")};
+    Renderable r = Renderable{
+        m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
+        &AssetManager::getShader(name.size() > 1 ? name[1] : "default")};
+    Logger::Debug("SHADER: %s", name.size() > 1 ? name[1].c_str() : "default");
     Transform et = Transform{};
     et.position.x = px;
     transforms.add(e, et);
@@ -239,6 +245,7 @@ void Game::framebufferSizeCallback(GLFWwindow *window, int width, int height) {
     return;
   glViewport(0, 0, width, height);
   game->camera.setAspectRatio(width, height);
+  game->window.setSize(width, height);
 }
 
 void Game::keyCallback(GLFWwindow *window, int key, int scancode, int action,
@@ -305,6 +312,8 @@ void Game::mouseButtonCallback(GLFWwindow *window, int button, int action,
   Game *game = static_cast<Game *>(glfwGetWindowUserPointer(window));
   if (!game)
     return;
+  if (game->guiHandler.GetWantMouseCapture())
+    return;
 
   game->inputHandler.handleMouseButton(button, action, mods);
 }
@@ -329,9 +338,20 @@ void Game::processInput() {
       inputHandler.setMouseLocked(!inputHandler.getMouseLocked(),
                                   window.getGLFWwindow());
     }
-    // std::cout << camComp.position.x << " " << camComp.position.y << " "
-    //           << camComp.position.z << std::endl;
     break;
+  }
+
+  if (inputHandler.isMousePressed(0)) {
+
+    // When a click happens:
+    glm::vec2 mousePos = inputHandler.getMousePos();
+    glm::vec2 screenSize = {window.getWidth(), window.getHeight()};
+
+    // Generate the ray
+    Ray mouseRay = getRay(camera.getViewMatrix(), camera.getProjectionMatrix(),
+                          camera.position);
+
+    transforms.get(1).position = mouseRay.at(10);
   }
 };
 

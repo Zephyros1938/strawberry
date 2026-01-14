@@ -7,13 +7,7 @@ class ShaderSystem {
 public:
   explicit ShaderSystem(Camera3D *cam) : cam(cam) {}
 
-  void update(ComponentStore<Renderable> &renderables) {
-    for (auto &[entity, renderable] : renderables.all()) {
-      renderable.shader->setMat4("uCameraProjection",
-                                 cam->getProjectionMatrix());
-      renderable.shader->setMat4("uCameraView", cam->getViewMatrix());
-    }
-  }
+  void update(ComponentStore<Renderable> &renderables) {}
 
 private:
   Camera3D *cam;

@@ -79,6 +79,15 @@ public:
   glm::vec2 getScroll() const { return m_Scroll; }
   ButtonState *getMousePointerState() { return m_PointerStates; }
 
+  bool isMouseDown(int mb) { return isMouseHeld(mb) || isMousePressed(mb); }
+  bool isMousePressed(int mb) {
+    return m_PointerStates[mb] == ButtonState::PRESS;
+  }
+  bool isMouseHeld(int mb) { return m_PointerStates[mb] == ButtonState::HOLD; }
+  bool isMouseUp(int mb) { return m_PointerStates[mb] == ButtonState::RELEASE; }
+
+  glm::dvec2 getMousePos() { return m_Last; }
+
   /*                            */
   /*          KEYBOARD          */
   /*                            */

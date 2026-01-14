@@ -6,11 +6,14 @@
 #include <map>
 #include <string>
 
+const int MESH_VERTEX_SIZE = 11;
+
 struct Mesh {
   unsigned int VAO;
   unsigned int VBO;
   unsigned int EBO;
   unsigned int indexCount;
+  unsigned int suggestedDrawMode;
   std::vector<Texture *> textures;
 };
 

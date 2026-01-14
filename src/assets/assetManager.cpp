@@ -84,6 +84,16 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
         vertices.push_back(0.0f);
       }
 
+      if (!attrib.colors.empty()) {
+        vertices.push_back(attrib.colors[3 * index.vertex_index + 0]);
+        vertices.push_back(attrib.colors[3 * index.vertex_index + 1]);
+        vertices.push_back(attrib.colors[3 * index.vertex_index + 2]);
+      } else {
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+      }
+
       indices.push_back(indices.size());
     }
   }
@@ -102,21 +112,47 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
                indices.data(), GL_STATIC_DRAW);
 
   // vertex positions
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                        MESH_VERTEX_SIZE * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
   // vertex normals
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                        MESH_VERTEX_SIZE * sizeof(float),
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
   // texcoords
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                        MESH_VERTEX_SIZE * sizeof(float),
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
+  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE,
+                        MESH_VERTEX_SIZE * sizeof(float),
+                        (void *)(8 * sizeof(float)));
+  glEnableVertexAttribArray(3);
+
+  unsigned int suggestedDrawMode = GL_TRIANGLES;
+
+  if (!shapes.empty() && !shapes[0].mesh.num_face_vertices.empty()) {
+    // Check the first face to set the primary mode
+    unsigned char firstFace = shapes[0].mesh.num_face_vertices[0];
+
+    if (firstFace == 1)
+      suggestedDrawMode = GL_POINTS;
+    else if (firstFace == 2)
+      suggestedDrawMode = GL_LINES;
+    else
+      suggestedDrawMode = GL_TRIANGLES;
+  }
+
+  Logger::Info("\tSuggested Draw Mode: %s",
+               suggestedDrawMode == GL_TRIANGLES ? "GL_TRIANGLES"
+               : suggestedDrawMode == GL_LINES   ? "GL_LINES"
+                                                 : "GL_POINTS");
 
   std::vector<Texture *> meshTextures;
   for (const auto &mat : materials) {
-    Logger::Info("\tFound material \"%s\"\n\t\tDiff: \"%s\"\n\t\tNorm: "
-                 "\"%s\"\n\t\tSpec: \"%s\"",
+    Logger::Info("\tFound material \"%s\"\n\t\t\tDiff: \"%s\"\n\t\t\tNorm: "
+                 "\"%s\"\n\t\t\tSpec: \"%s\"",
                  name.c_str(), mat.diffuse_texname.c_str(),
                  mat.normal_texname.c_str(), mat.specular_texname.c_str());
     for (auto texture :
@@ -131,7 +167,11 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
     };
   }
 
-  Mesh mesh{VAO, VBO, EBO, static_cast<unsigned int>(indices.size()),
+  Mesh mesh{VAO,
+            VBO,
+            EBO,
+            static_cast<unsigned int>(indices.size()),
+            suggestedDrawMode,
             meshTextures};
   meshes[name] = mesh;
   return meshes[name];

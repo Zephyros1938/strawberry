@@ -15,6 +15,8 @@ void RenderSystem::update(ComponentStore<Transform> &transforms,
     if (!renderables.has(entity))
       continue;
     auto &renderable = renderables.get(entity);
+    if (renderable.shader)
+      renderable.shader->use();
 
     // Compute model matrix
     glm::mat4 model = glm::mat4(1.0f);
@@ -33,7 +35,9 @@ void RenderSystem::update(ComponentStore<Transform> &transforms,
 
     // Draw
     glBindVertexArray(renderable.vao);
-    glDrawElements(GL_TRIANGLES, renderable.indexCount, GL_UNSIGNED_INT, 0);
+
+    glDrawElements(renderable.drawMode, renderable.indexCount, GL_UNSIGNED_INT,
+                   0);
     glBindVertexArray(0);
 
     // Unbind textures

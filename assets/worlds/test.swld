@@ -1,0 +1,30 @@
+V0.1.0
+BEGINSHADERdefault
+SHADERVERTassets/shaders/default.vert
+SHADERFRAGassets/shaders/default.frag
+ENDSHADER
+BEGINSHADERsimple
+SHADERVERTassets/shaders/simple.vert
+SHADERFRAGassets/shaders/simple.frag
+ENDSHADER
+
+BEGINMESHcheetah
+MESHassets/models/cheetah/cheetah.obj
+ENDMESH
+
+BEGINMESHxyzArrow
+MESHassets/editor/models/xyzArrow/model.obj
+ENDMESH
+
+BEGINENTITY test
+MESH: cheetah
+POS: 0.0,0.0,0.0
+ROT: 0.0,0.0,0.0
+SCALE: 1.0,1.0,1.0
+ENDENTITY
+
+#BEGINENTITY arrow
+#MESH: xyzArrow
+#POS: 0.0,2.5,0.0
+#SHADER: simple
+#ENDENTITY

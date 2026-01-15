@@ -1,7 +1,7 @@
 [
   {
     "arguments": [
-      "/usr/bin/gcc",
+      "/usr/bin/g++",
       "-std=c++20",
       "-O2",
       "-Wall",
@@ -15,12 +15,12 @@
       "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
       "-c",
       "-o",
-      "include/glad/glad.o",
-      "include/glad/glad.c"
+      "src/main.o",
+      "src/main.cpp"
     ],
     "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/include/glad/glad.c",
-    "output": "/home/zeph/gamedev/strawberry/include/glad/glad.o"
+    "file": "/home/zeph/gamedev/strawberry/src/main.cpp",
+    "output": "/home/zeph/gamedev/strawberry/src/main.o"
   },
   {
     "arguments": [
@@ -38,149 +38,11 @@
       "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
       "-c",
       "-o",
-      "external/imgui/imgui.o",
-      "external/imgui/imgui.cpp"
+      "src/game/game.o",
+      "src/game/game.cpp"
     ],
     "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/external/imgui/imgui.cpp",
-    "output": "/home/zeph/gamedev/strawberry/external/imgui/imgui.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-std=c++20",
-      "-O2",
-      "-Wall",
-      "-Wextra",
-      "-I./include",
-      "-I./src",
-      "-I./external/imgui",
-      "-I./external/imgui/backends",
-      "-I./external/tinyobjloader",
-      "-I./include/glad",
-      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
-      "-c",
-      "-o",
-      "external/imgui/imgui_draw.o",
-      "external/imgui/imgui_draw.cpp"
-    ],
-    "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/external/imgui/imgui_draw.cpp",
-    "output": "/home/zeph/gamedev/strawberry/external/imgui/imgui_draw.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-std=c++20",
-      "-O2",
-      "-Wall",
-      "-Wextra",
-      "-I./include",
-      "-I./src",
-      "-I./external/imgui",
-      "-I./external/imgui/backends",
-      "-I./external/tinyobjloader",
-      "-I./include/glad",
-      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
-      "-c",
-      "-o",
-      "external/imgui/imgui_widgets.o",
-      "external/imgui/imgui_widgets.cpp"
-    ],
-    "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/external/imgui/imgui_widgets.cpp",
-    "output": "/home/zeph/gamedev/strawberry/external/imgui/imgui_widgets.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-std=c++20",
-      "-O2",
-      "-Wall",
-      "-Wextra",
-      "-I./include",
-      "-I./src",
-      "-I./external/imgui",
-      "-I./external/imgui/backends",
-      "-I./external/tinyobjloader",
-      "-I./include/glad",
-      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
-      "-c",
-      "-o",
-      "external/imgui/imgui_tables.o",
-      "external/imgui/imgui_tables.cpp"
-    ],
-    "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/external/imgui/imgui_tables.cpp",
-    "output": "/home/zeph/gamedev/strawberry/external/imgui/imgui_tables.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-std=c++20",
-      "-O2",
-      "-Wall",
-      "-Wextra",
-      "-I./include",
-      "-I./src",
-      "-I./external/imgui",
-      "-I./external/imgui/backends",
-      "-I./external/tinyobjloader",
-      "-I./include/glad",
-      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
-      "-c",
-      "-o",
-      "external/imgui/imgui_demo.o",
-      "external/imgui/imgui_demo.cpp"
-    ],
-    "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/external/imgui/imgui_demo.cpp",
-    "output": "/home/zeph/gamedev/strawberry/external/imgui/imgui_demo.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-std=c++20",
-      "-O2",
-      "-Wall",
-      "-Wextra",
-      "-I./include",
-      "-I./src",
-      "-I./external/imgui",
-      "-I./external/imgui/backends",
-      "-I./external/tinyobjloader",
-      "-I./include/glad",
-      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
-      "-c",
-      "-o",
-      "external/imgui/backends/imgui_impl_glfw.o",
-      "external/imgui/backends/imgui_impl_glfw.cpp"
-    ],
-    "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/external/imgui/backends/imgui_impl_glfw.cpp",
-    "output": "/home/zeph/gamedev/strawberry/external/imgui/backends/imgui_impl_glfw.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/g++",
-      "-std=c++20",
-      "-O2",
-      "-Wall",
-      "-Wextra",
-      "-I./include",
-      "-I./src",
-      "-I./external/imgui",
-      "-I./external/imgui/backends",
-      "-I./external/tinyobjloader",
-      "-I./include/glad",
-      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
-      "-c",
-      "-o",
-      "external/imgui/backends/imgui_impl_opengl3.o",
-      "external/imgui/backends/imgui_impl_opengl3.cpp"
-    ],
-    "directory": "/home/zeph/gamedev/strawberry",
-    "file": "/home/zeph/gamedev/strawberry/external/imgui/backends/imgui_impl_opengl3.cpp",
-    "output": "/home/zeph/gamedev/strawberry/external/imgui/backends/imgui_impl_opengl3.o"
+    "file": "/home/zeph/gamedev/strawberry/src/game/game.cpp",
+    "output": "/home/zeph/gamedev/strawberry/src/game/game.o"
   }
 ]

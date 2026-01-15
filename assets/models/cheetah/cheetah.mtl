@@ -7,4 +7,4 @@ Ns 10.0                     # Specular exponent
 d 1.0                       # Transparency (1.0 = opaque)
 illum 2                     # Illumination model
 
-map_Kd cheetah.png
+map_Kd cheetah2noalpha.png

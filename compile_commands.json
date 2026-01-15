@@ -18,9 +18,9 @@
       "src/main.o",
       "src/main.cpp"
     ],
-    "directory": "/home/zeph/Coding/GAMES/strawberry",
-    "file": "/home/zeph/Coding/GAMES/strawberry/src/main.cpp",
-    "output": "/home/zeph/Coding/GAMES/strawberry/src/main.o"
+    "directory": "/home/zeph/gamedev/strawberry",
+    "file": "/home/zeph/gamedev/strawberry/src/main.cpp",
+    "output": "/home/zeph/gamedev/strawberry/src/main.o"
   },
   {
     "arguments": [
@@ -41,8 +41,8 @@
       "src/game/game.o",
       "src/game/game.cpp"
     ],
-    "directory": "/home/zeph/Coding/GAMES/strawberry",
-    "file": "/home/zeph/Coding/GAMES/strawberry/src/game/game.cpp",
-    "output": "/home/zeph/Coding/GAMES/strawberry/src/game/game.o"
+    "directory": "/home/zeph/gamedev/strawberry",
+    "file": "/home/zeph/gamedev/strawberry/src/game/game.cpp",
+    "output": "/home/zeph/gamedev/strawberry/src/game/game.o"
   }
 ]

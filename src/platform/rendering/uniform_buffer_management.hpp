@@ -31,8 +31,8 @@ public:
     sizes.emplace(name, dataSize);
     nextOffset = alignedOffset + dataSize;
 
-    Logger::Info("Uniform \"%s\" registered at 0x%X", name.c_str(),
-                 alignedOffset);
+    Logger::Debug("Uniform \"%s\" registered at 0x%X", name.c_str(),
+                  alignedOffset);
   }
 
   void setData(const std::string &name, const void *data) {

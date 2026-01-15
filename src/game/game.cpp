@@ -116,11 +116,6 @@ void Game::setupScene() {
 
   renderSystem = RenderSystem();
 
-  Entity ce = world.createEntity();
-  CameraComponent cc = CameraComponent();
-
-  world.addComponent(ce, cc);
-
   inputHandler.setMouseSensitiviy(0.5);
 
   uniformBufferManager.registerUniform("uCameraView", sizeof(glm::mat4), 16);
@@ -143,14 +138,15 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
     Name n = Name{i.name};
     world.addComponent(e, n);
     if (i.data.count("POS")) {
-      Transform t;
-      t.position = parseVec<glm::vec3, 3>(i.data.at("POS"));
+      Transform t{glm::vec3(0), glm::vec3(0), glm::vec3(1)};
+      t.position = parseVec<glm::vec3>(i.data.at("POS"));
       if (i.data.count("ROT")) {
-        t.rotation = parseVec<glm::vec3, 3>(i.data.at("ROT"));
+        t.rotation = parseVec<glm::vec3>(i.data.at("ROT"));
       }
       if (i.data.count("SCALE")) {
-        t.scale = parseVec<glm::vec3, 3>(i.data.at("SCALE"));
+        t.scale = parseVec<glm::vec3>(i.data.at("SCALE"));
       }
+
       world.addComponent(e, t);
     }
     if (i.data.count("MESH")) {
@@ -163,6 +159,11 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
       world.addComponent(e, r);
     }
   }
+
+  Entity ce = world.createEntity();
+  CameraComponent cc = CameraComponent();
+
+  world.addComponent(ce, cc);
 }
 
 void Game::framebufferSizeCallback(GLFWwindow *window, int width, int height) {

@@ -21,7 +21,7 @@ public:
   }
 
 private:
-  static inline uint8_t nextId = 0;
+  inline static uint8_t nextId = 0;
 };
 
 class IComponentStore {
@@ -50,8 +50,20 @@ public:
   }
 
   template <typename T> void addComponent(Entity e, T component) {
-    getStore<T>()->add(e, component);
-    signatures[e].set(ComponentTypeManager::getId<T>(), true);
+    auto store = getStore<T>();
+
+    if (!store) {
+      throw std::runtime_error("Failed to retrieve store for component!");
+    }
+
+    store->add(e, component);
+
+    uint8_t componentId = ComponentTypeManager::getId<T>();
+    if (componentId >= MAX_COMPONENTS) {
+      throw std::runtime_error("Exceeded MAX_COMPONENTS!");
+    }
+
+    signatures[e].set(componentId, true);
   }
 
   template <typename T> T &getComponent(Entity e) {

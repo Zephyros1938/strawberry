@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/logger.hpp"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -53,6 +54,7 @@ public:
   std::vector<EntityBlueprint> entityBlueprints;
 
   WorldLoader(const std::string filePath) {
+    Logger::Debug("Loading world from file \"%s\"", filePath.c_str());
     std::ifstream file(filePath);
 
     if (!file) {
@@ -61,6 +63,7 @@ public:
 
     std::string version;
     std::getline(file, version);
+    Logger::Debug("\tVERSION: %s", version.substr(1).c_str());
 
     if (version == "V0.1.0") {
       std::string line;
@@ -69,6 +72,8 @@ public:
       while (std::getline(file, line)) {
 
         if (line.empty())
+          continue;
+        if (line.substr(0, 1) == "#")
           continue;
 
         switch (currentReadPhase) {

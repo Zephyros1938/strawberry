@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iostream"
+#include "util/logger.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <glm/vec2.hpp>
@@ -22,7 +22,7 @@ public:
 
   glm::vec2 handleMouseMove(double xpos, double ypos) {
     if (m_Debug) {
-      std::cout << "Mouse Move: (" << xpos << "," << ypos << ")" << std::endl;
+      Logger::Debug("Mouse moved to %dx%d", xpos, ypos);
     }
     if (m_FirstMouse) {
       m_Last.x = xpos;
@@ -39,8 +39,7 @@ public:
 
   void handleMouseButton(int button, int action, int mods) {
     if (m_Debug)
-      std::cout << "Mouse Button: " << button << ":" << action << ":" << mods
-                << std::endl;
+      Logger::Debug("Mouse button: %i:%i:%i", button, action, mods);
 
     if (action == GLFW_PRESS) {
       m_PointerStates[button] = ButtonState::PRESS;
@@ -94,8 +93,7 @@ public:
 
   void handleKeyboard(int key, int scancode, int action, int mods) {
     if (k_Debug) {
-      std::cout << "Key: " << key << ":" << scancode << ":" << action << ":"
-                << mods << std::endl;
+      Logger::Debug("Key pressed: %c:%i:%i:%i", key, scancode, action, mods);
     }
 
     if (action == GLFW_PRESS) {

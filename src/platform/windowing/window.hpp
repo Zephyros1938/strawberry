@@ -9,13 +9,13 @@ class Window {
 public:
   Window(int width, int height, const std::string &title)
       : width(width), height(height), title(title) {
-    Logger::Info("Init GLFW");
+    Logger::Debug("Init GLFW");
     initGLFW();
-    Logger::Info("Create window");
+    Logger::Debug("Create window");
     createWindow();
-    Logger::Info("Init OpenGL");
+    Logger::Debug("Init OpenGL");
     initGLAD();
-    Logger::Info("Finalize OpenGL state");
+    Logger::Debug("Finalize OpenGL state");
     setupOpenGLState();
   }
 

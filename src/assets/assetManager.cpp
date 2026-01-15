@@ -8,7 +8,7 @@
 
 Texture &AssetManager::loadTexture(const std::string &name, const char *path) {
   auto it = textures.find(name);
-  Logger::Info("Loading texture \"%s\" (%s)", name.c_str(), path);
+  Logger::Debug("Loading texture \"%s\" (%s)", name.c_str(), path);
 
   if (it == textures.end()) {
     auto [newIt, success] = textures.emplace(name, Texture(path));
@@ -26,7 +26,7 @@ Shader &AssetManager::loadShader(const std::string &name,
                                  const std::string &vertPath,
                                  const std::string &fragPath) {
   auto it = shaders.find(name);
-  Logger::Info("Loading shader \"%s\"", name.c_str());
+  Logger::Debug("Loading shader \"%s\"", name.c_str());
 
   if (it == shaders.end()) {
     auto [newIt, success] =
@@ -41,7 +41,7 @@ Shader &AssetManager::getShader(const std::string &name) {
 }
 
 Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
-  Logger::Info("Loading mesh \"%s\" (%s)", name.c_str(), path);
+  Logger::Debug("Loading mesh \"%s\" (%s)", name.c_str(), path);
   if (meshes.find(name) != meshes.end())
     return meshes[name];
 
@@ -144,17 +144,17 @@ Mesh &AssetManager::loadMesh(const std::string &name, const char *path) {
       suggestedDrawMode = GL_TRIANGLES;
   }
 
-  Logger::Info("\tSuggested Draw Mode: %s",
-               suggestedDrawMode == GL_TRIANGLES ? "GL_TRIANGLES"
-               : suggestedDrawMode == GL_LINES   ? "GL_LINES"
-                                                 : "GL_POINTS");
+  Logger::Debug("\tSuggested Draw Mode: %s",
+                suggestedDrawMode == GL_TRIANGLES ? "GL_TRIANGLES"
+                : suggestedDrawMode == GL_LINES   ? "GL_LINES"
+                                                  : "GL_POINTS");
 
   std::vector<Texture *> meshTextures;
   for (const auto &mat : materials) {
-    Logger::Info("\tFound material \"%s\"\n\t\t\tDiff: \"%s\"\n\t\t\tNorm: "
-                 "\"%s\"\n\t\t\tSpec: \"%s\"",
-                 name.c_str(), mat.diffuse_texname.c_str(),
-                 mat.normal_texname.c_str(), mat.specular_texname.c_str());
+    Logger::Debug("\tFound material \"%s\"\n\t\t\tDiff: \"%s\"\n\t\t\tNorm: "
+                  "\"%s\"\n\t\t\tSpec: \"%s\"",
+                  name.c_str(), mat.diffuse_texname.c_str(),
+                  mat.normal_texname.c_str(), mat.specular_texname.c_str());
     for (auto texture :
          {mat.diffuse_texname, mat.normal_texname, mat.specular_texname}) {
       if (!texture.empty()) {

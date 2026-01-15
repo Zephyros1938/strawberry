@@ -5,28 +5,24 @@
 void RenderSystem::update(ComponentStore<Transform> &transforms,
                           ComponentStore<Renderable> &renderables) {
   glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
-  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-  if (!shader)
-    return;
-  shader->use();
-
-  for (auto &[entity, transform] : transforms.all()) {
-    if (!renderables.has(entity))
-      continue;
-    auto &renderable = renderables.get(entity);
+  for (auto &[entity, renderable] : renderables.all()) {
     if (renderable.shader)
       renderable.shader->use();
 
     // Compute model matrix
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, transform.position);
-    model = glm::rotate(model, transform.rotation.x, glm::vec3(1, 0, 0));
-    model = glm::rotate(model, transform.rotation.y, glm::vec3(0, 1, 0));
-    model = glm::rotate(model, transform.rotation.z, glm::vec3(0, 0, 1));
-    model = glm::scale(model, transform.scale);
+    if (transforms.has(entity)) {
+      Transform transform = transforms.get(entity);
+      model = glm::translate(model, transform.position);
+      model = glm::rotate(model, transform.rotation.x, glm::vec3(1, 0, 0));
+      model = glm::rotate(model, transform.rotation.y, glm::vec3(0, 1, 0));
+      model = glm::rotate(model, transform.rotation.z, glm::vec3(0, 0, 1));
+      model = glm::scale(model, transform.scale);
+    }
 
-    shader->setMat4("uModel", model);
+    renderable.shader->setMat4("uModel", model);
 
     // Bind textures if any
     for (size_t i = 0; i < renderable.textures.size(); ++i) {
@@ -35,15 +31,13 @@ void RenderSystem::update(ComponentStore<Transform> &transforms,
 
     // Draw
     glBindVertexArray(renderable.vao);
-
     glDrawElements(renderable.drawMode, renderable.indexCount, GL_UNSIGNED_INT,
                    0);
     glBindVertexArray(0);
 
     // Unbind textures
     for (size_t i = 0; i < renderable.textures.size(); ++i) {
-      glActiveTexture(GL_TEXTURE0 + i);
-      glBindTexture(GL_TEXTURE_2D, 0);
+      renderable.textures[i]->unbind(GL_TEXTURE0 + i);
     }
   }
 }

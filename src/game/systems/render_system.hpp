@@ -7,13 +7,11 @@
 
 class RenderSystem {
 public:
-  explicit RenderSystem(Shader *defaultShader = nullptr)
-      : shader(defaultShader) {}
+  explicit RenderSystem() {}
 
   void update(ComponentStore<Transform> &transforms,
               ComponentStore<Renderable> &renderables);
 
 private:
-  Shader *shader; // default, overidden by renderables
   float clearColor[4] = {0.5, 0.5, 0.5, 1.0};
 };

@@ -10,8 +10,8 @@ struct Ray {
   glm::vec3 at(float distance) const { return origin + (direction * distance); }
 };
 
-inline Ray getRay(const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix,
-                  const glm::vec3 &pos) {
+inline Ray getRayVP(const glm::mat4 &viewMatrix, const glm::mat4 &projMatrix,
+                    const glm::vec3 &pos) {
   glm::mat4 invVP = glm::inverse(projMatrix * viewMatrix);
   glm::vec4 screenPos = glm::vec4(0.0, 0.0, -1.0f, 1.0f);
   glm::vec4 worldPosHomo = invVP * screenPos;

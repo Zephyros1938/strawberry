@@ -11,4 +11,5 @@ public:
   Texture(const char *path);
   Texture();
   void bind(int target) const;
+  void unbind(int target) const;
 };

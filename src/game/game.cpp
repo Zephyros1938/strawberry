@@ -24,7 +24,7 @@
 Game::Game(int width, int height, const std::string &title)
     : window(width, height, title), inputHandler(false, false),
       uniformBufferManager(256, 0), guiHandler(window.getGLFWwindow()),
-      cameraSystem(&camera), shaderSystem(&camera), totalTime(0.0) {}
+      cameraSystem(&camera), totalTime(0.0) {}
 
 void Game::run() {
   setupScene();
@@ -59,28 +59,21 @@ void Game::run() {
     uniformBufferManager.setData("uTime", &totalTime);
 
     guiHandler.NewFrame();
-
-    // ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-    ButtonState *bs = inputHandler.getMousePointerState();
-
     ImGui::Begin("Debugging");
-
-    // --- Performance & Camera ---
+    ImGui::SeparatorText("Window");
     ImGui::Text("FPS: %.2f", 1.0f / deltaTime);
     ImGui::Text("Time: %.2f", totalTime);
     ImGui::Text("GLFW Time: %.2f", window.getTime());
+    ImGui::Text("Difference GLFW-Time: %.02f", window.getTime() - totalTime);
     int wx, wy;
     glfwGetWindowSize(window.getGLFWwindow(), &wx, &wy);
     ImGui::Text("Size: %ix%i", wx, wy);
-
     ImGui::SeparatorText("Camera System");
-    ImGui::Text("MOUSE: %i%i%i%i%i%i%i%i", bs[0], bs[1], bs[2], bs[3], bs[4],
-                bs[5], bs[6], bs[7]);
     ImGui::Text("POSIT: x%.2f y%.2f z%.2f", camera.position.x,
                 camera.position.y, camera.position.z);
     ImGui::Text("ROTAT: x%.2f y%.2f z%.2f", camera.front.x, camera.front.y,
                 camera.front.z);
-
+    ImGui::Text("Zoom: %.2f", camera.zoom);
     ImGui::SeparatorText("Logs");
     if (ImGui::Button("Clear Logs")) {
       Logger::Clear();
@@ -101,36 +94,6 @@ void Game::run() {
     ImGui::EndChild();
 
     ImGui::End();
-    ImGui::Begin("Asset Manager Info");
-
-    ImGui::BeginChild("Meshes");
-
-    auto allMeshes = AssetManager::meshes;
-    for (auto [meshName, mesh] : allMeshes) {
-      ImGui::Text("%s : %i", meshName.c_str(), mesh.VAO);
-      for (auto t : mesh.textures) {
-        ImGui::Text("%i", t->ID);
-        ImGui::Image(ImTextureRef(t->ID), ImVec2(64, 64));
-      }
-    }
-
-    ImGui::EndChild();
-
-    ImGui::BeginChild("Textures", ImVec2(0, 300), true,
-                      ImGuiWindowFlags_HorizontalScrollbar);
-
-    auto allTextures = AssetManager::textures;
-
-    for (auto [texName, texture] : allTextures) {
-      ImGui::Text("%s", texName.c_str());
-      ImGui::Image(ImTextureRef(texture.ID),
-                   ImVec2(texture.width ? texture.width : 256,
-                          texture.height ? texture.height : 256));
-    }
-
-    ImGui::EndChild();
-    ImGui::End();
-
     ImGui::Begin("Editor");
 
     // NO LOOP HERE
@@ -191,8 +154,9 @@ void Game::setupScene() {
 
   window.setScrollCallback(scrollCallback);
 
-  renderSystem = RenderSystem(&AssetManager::loadShader(
-      "default", "assets/shaders/default.vert", "assets/shaders/default.frag"));
+  renderSystem = RenderSystem();
+  AssetManager::loadShader("default", "assets/shaders/default.vert",
+                           "assets/shaders/default.frag");
   AssetManager::loadShader("simple", "assets/shaders/simple.vert",
                            "assets/shaders/simple.frag");
 
@@ -342,14 +306,8 @@ void Game::processInput() {
   }
 
   if (inputHandler.isMousePressed(0)) {
-
-    // When a click happens:
-    glm::vec2 mousePos = inputHandler.getMousePos();
-    glm::vec2 screenSize = {window.getWidth(), window.getHeight()};
-
-    // Generate the ray
-    Ray mouseRay = getRay(camera.getViewMatrix(), camera.getProjectionMatrix(),
-                          camera.position);
+    Ray mouseRay = getRayVP(camera.getViewMatrix(),
+                            camera.getProjectionMatrix(), camera.position);
 
     transforms.get(1).position = mouseRay.at(10);
   }

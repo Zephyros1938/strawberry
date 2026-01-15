@@ -7,7 +7,6 @@
 #include "game/systems/camera_system.hpp"
 #include "game/systems/gui_system.hpp"
 #include "game/systems/render_system.hpp"
-#include "game/systems/shader_system.hpp"
 #include "platform/gui/guiHandler.hpp"
 #include "platform/input/inputHandler.hpp"
 #include "platform/rendering/camera.hpp"
@@ -59,7 +58,6 @@ private:
   // Systems
   RenderSystem renderSystem;
   CameraSystem cameraSystem;
-  ShaderSystem shaderSystem;
 
   float deltaTime;
   float lastFrame;

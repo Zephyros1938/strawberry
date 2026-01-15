@@ -63,3 +63,8 @@ void Texture::bind(int target = GL_TEXTURE0) const {
   glActiveTexture(target);
   glBindTexture(GL_TEXTURE_2D, ID);
 }
+
+void Texture::unbind(int target = GL_TEXTURE0) const {
+  glActiveTexture(target);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}

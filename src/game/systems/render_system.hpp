@@ -20,18 +20,20 @@ public:
     for (auto entity : entities) {
       // Get references (use & to avoid copying large structs every frame)
       auto &renderable = ecs.getComponent<Renderable>(entity);
-      auto &transform = ecs.getComponent<Transform>(entity);
 
       if (renderable.shader)
         renderable.shader->use();
 
       // 1. Compute model matrix using the transform we know exists
       glm::mat4 model = glm::mat4(1.0f);
-      model = glm::translate(model, transform.position);
-      model = glm::rotate(model, transform.rotation.x, glm::vec3(1, 0, 0));
-      model = glm::rotate(model, transform.rotation.y, glm::vec3(0, 1, 0));
-      model = glm::rotate(model, transform.rotation.z, glm::vec3(0, 0, 1));
-      model = glm::scale(model, transform.scale);
+      if (ecs.hasComponent<Transform>(entity)) {
+        auto &transform = ecs.getComponent<Transform>(entity);
+        model = glm::translate(model, transform.position);
+        model = glm::rotate(model, transform.rotation.x, glm::vec3(1, 0, 0));
+        model = glm::rotate(model, transform.rotation.y, glm::vec3(0, 1, 0));
+        model = glm::rotate(model, transform.rotation.z, glm::vec3(0, 0, 1));
+        model = glm::scale(model, transform.scale);
+      }
 
       renderable.shader->setMat4("uModel", model);
 

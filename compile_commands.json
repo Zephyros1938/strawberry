@@ -1,1 +1,48 @@
-[]
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-I./include",
+      "-I./src",
+      "-I./external/imgui",
+      "-I./external/imgui/backends",
+      "-I./external/tinyobjloader",
+      "-I./include/glad",
+      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
+      "-c",
+      "-o",
+      "src/main.o",
+      "src/main.cpp"
+    ],
+    "directory": "/home/zeph/Coding/GAMES/strawberry",
+    "file": "/home/zeph/Coding/GAMES/strawberry/src/main.cpp",
+    "output": "/home/zeph/Coding/GAMES/strawberry/src/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-I./include",
+      "-I./src",
+      "-I./external/imgui",
+      "-I./external/imgui/backends",
+      "-I./external/tinyobjloader",
+      "-I./include/glad",
+      "-DIMGUI_IMPL_GLFW_DISABLE_CUSTOM_PLATFORM_CHECK",
+      "-c",
+      "-o",
+      "src/game/game.o",
+      "src/game/game.cpp"
+    ],
+    "directory": "/home/zeph/Coding/GAMES/strawberry",
+    "file": "/home/zeph/Coding/GAMES/strawberry/src/game/game.cpp",
+    "output": "/home/zeph/Coding/GAMES/strawberry/src/game/game.o"
+  }
+]

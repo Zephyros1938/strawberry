@@ -58,6 +58,10 @@ public:
     return getStore<T>()->get(e);
   }
 
+  template <typename T> bool hasComponent(Entity e) {
+    return signatures[e].test(ComponentTypeManager::getId<T>());
+  }
+
   template <typename... Components> std::vector<Entity> query() {
     Signature requirement;
     // Fold expression to set bits for all requested types

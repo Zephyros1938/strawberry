@@ -1,9 +1,6 @@
 #pragma once
 
 #include "engine/ecs2.hpp"
-#include "game/components/camera_component.hpp"
-#include "game/components/renderable.hpp"
-#include "game/components/transform.hpp"
 #include "game/systems/camera_system.hpp"
 #include "game/systems/render_system.hpp"
 #include "platform/gui/guiHandler.hpp"

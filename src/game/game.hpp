@@ -26,6 +26,7 @@ public:
 private:
   void processInput();
   void setupScene();
+  void loadScene(std::string fp);
 
   // Callbacks
   static void framebufferSizeCallback(GLFWwindow *window, int width,

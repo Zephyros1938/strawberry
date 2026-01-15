@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/ecs.hpp"
+#include "engine/ecs2.hpp"
 #include "game/components/camera_component.hpp"
 #include "game/components/renderable.hpp"
 #include "game/components/transform.hpp"
@@ -48,13 +48,8 @@ private:
   GuiHandler guiHandler;
 
   // ECS
-  ECS world;
+  ECS2 world;
 
-  // Components
-  ComponentStore<Transform> transforms;
-  ComponentStore<Renderable> renderables;
-  ComponentStore<CameraComponent> cameras;
-  ComponentStore<std::string> names;
   // Systems
   RenderSystem renderSystem;
   CameraSystem cameraSystem;

@@ -1,7 +1,8 @@
 #include "game/game.hpp"
 #include "assets/assetManager.hpp"
-#include "engine/ecs.hpp"
+#include "engine/ecs2.hpp"
 #include "game/components/camera_component.hpp"
+#include "game/components/name_component.hpp"
 #include "game/components/renderable.hpp"
 #include "game/components/transform.hpp"
 #include "game/systems/camera_system.hpp"
@@ -15,7 +16,6 @@
 #include "platform/rendering/uniform_buffer_management.hpp"
 #include "util/logger.hpp"
 #include <GLFW/glfw3.h>
-#include <algorithm>
 #include <cstdio>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
@@ -38,7 +38,6 @@ void Game::run() {
   io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
   totalTime = 0.0;
-  static Entity selectedEID = 0;
 
   while (!window.shouldClose()) {
     float currentFrame = window.getTime();
@@ -53,7 +52,7 @@ void Game::run() {
     inputHandler.updateKeyboard();
     inputHandler.updateMouseButton();
 
-    cameraSystem.update(cameras, transforms);
+    cameraSystem.update(world);
 
     glm::mat4 cameraProjectionMatrix = camera.getProjectionMatrix();
     glm::mat4 cameraViewMatrix = camera.getViewMatrix();
@@ -98,51 +97,9 @@ void Game::run() {
     ImGui::EndChild();
 
     ImGui::End();
-    ImGui::Begin("Editor");
-
-    // NO LOOP HERE
-    if (ImGui::BeginCombo(
-            "Select Entity",
-            selectedEID == 0 ? "None" : std::to_string(selectedEID).c_str())) {
-      // THE LOOP GOES INSIDE: This populates the list items
-      for (unsigned int e = 1; e <= world.getNextEntityId(); e++) {
-        if (!transforms.has(e))
-          continue;
-
-        bool isSelected = (selectedEID == e);
-        if (ImGui::Selectable(std::to_string(e).c_str(), isSelected)) {
-          selectedEID = e;
-        }
-
-        if (isSelected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
-
-    ImGui::Separator();
-
-    // Now show the sliders for the one entity we picked
-    if (selectedEID != 0 && transforms.has(selectedEID)) {
-      Transform &t = transforms.get(selectedEID);
-
-      names.has(selectedEID)
-          ? ImGui::Text("Editing Entity \"%s\" (EID: %i)",
-                        names.get(selectedEID).c_str(), selectedEID)
-          : ImGui::Text("Editing Entity <noname> (EID: %i)", selectedEID);
-      ImGui::DragFloat3("Position", &t.position.x, 0.1f);
-      ImGui::DragFloat3("Rotation", &t.rotation.x, 0.5f);
-      ImGui::DragFloat3("Scale", &t.scale.x, 0.05f);
-
-    } else {
-      ImGui::Text("Please select an entity from the dropdown.");
-    }
-
-    ImGui::End();
 
     guiHandler.Finalize();
-    renderSystem.update(transforms, renderables);
+    renderSystem.update(world);
     guiHandler.Render();
 
     window.swapBuffers();
@@ -161,7 +118,8 @@ void Game::setupScene() {
 
   Entity ce = world.createEntity();
   CameraComponent cc = CameraComponent();
-  cameras.add(ce, cc);
+
+  world.addComponent(ce, cc);
 
   inputHandler.setMouseSensitiviy(0.5);
 
@@ -182,7 +140,8 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
   }
   for (auto i : l.entityBlueprints) {
     Entity e = world.createEntity();
-    names.add(e, i.name);
+    Name n = Name{i.name};
+    world.addComponent(e, n);
     if (i.data.count("POS")) {
       Transform t;
       t.position = parseVec<glm::vec3, 3>(i.data.at("POS"));
@@ -192,7 +151,7 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
       if (i.data.count("SCALE")) {
         t.scale = parseVec<glm::vec3, 3>(i.data.at("SCALE"));
       }
-      transforms.add(e, t);
+      world.addComponent(e, t);
     }
     if (i.data.count("MESH")) {
       Mesh m = AssetManager::getMesh(i.data.at("MESH").c_str());
@@ -201,7 +160,7 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
                      i.data.count("SHADER")
                          ? &AssetManager::getShader(i.data.at("SHADER").c_str())
                          : &AssetManager::getShader("default")};
-      renderables.add(e, r);
+      world.addComponent(e, r);
     }
   }
 }
@@ -243,7 +202,10 @@ void Game::cursorPosCallback(GLFWwindow *window, double x, double y) {
 
   glm::vec2 d = game->inputHandler.handleMouseMove(x, y) *
                 game->inputHandler.getMouseSensitivity();
-  for (auto &[entity, camComp] : game->cameras.all()) {
+  auto cameras = game->world.query<CameraComponent>();
+  for (auto &entity : cameras) {
+    auto &camComp = game->world.getComponent<CameraComponent>(entity);
+
     camComp.pitch += d.y;
     if (camComp.constrainPitch) {
       camComp.pitch = std::clamp(camComp.pitch, -89.0f, 89.0f);
@@ -266,7 +228,10 @@ void Game::scrollCallback(GLFWwindow *window, double x, double y) {
     return;
 
   game->inputHandler.handleScroll(x, y);
-  for (auto &[entity, camComp] : game->cameras.all()) {
+  auto cameras = game->world.query<CameraComponent>();
+  for (auto &entity : cameras) {
+    auto &camComp = game->world.getComponent<CameraComponent>(entity);
+
     camComp.fov = std::clamp(camComp.fov - game->inputHandler.getScroll().y,
                              1.0f, 160.0f);
   }
@@ -286,7 +251,10 @@ void Game::mouseButtonCallback(GLFWwindow *window, int button, int action,
 }
 
 void Game::processInput() {
-  for (auto &[entity, camComp] : cameras.all()) {
+  auto cameras = world.query<CameraComponent>();
+  for (auto &entity : cameras) {
+    auto &camComp = world.getComponent<CameraComponent>(entity);
+
     if (inputHandler.isKeyHeld('W')) {
       camComp.position += camComp.front * deltaTime;
     }

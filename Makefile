@@ -22,7 +22,6 @@ CXXFLAGS = -std=c++20 -O2 -Wall -Wextra \
 LDFLAGS = $(GLFW_LIB) -lGL -lwayland-client -lxkbcommon -lpthread -ldl
 
 SRCS = src/main.cpp src/platform/rendering/texture.cpp src/game/game.cpp \
-       src/game/systems/camera_system.cpp src/game/systems/render_system.cpp \
        src/assets/assetManager.cpp src/util/utilStatics.cpp \
        include/glad/glad.c \
        external/imgui/imgui.cpp \

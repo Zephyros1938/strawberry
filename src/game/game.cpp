@@ -6,6 +6,7 @@
 #include "game/components/transform.hpp"
 #include "game/systems/camera_system.hpp"
 #include "game/systems/render_system.hpp"
+#include "game/utils/worldLoader.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "platform/gui/guiHandler.hpp"
@@ -151,44 +152,23 @@ void Game::setupScene() {
   window.setKeyCallback(keyCallback);
   window.setCursorPosCallback(cursorPosCallback);
   window.setMouseButtonCallback(mouseButtonCallback);
-
   window.setScrollCallback(scrollCallback);
 
-  renderSystem = RenderSystem();
-  AssetManager::loadShader("default", "assets/shaders/default.vert",
-                           "assets/shaders/default.frag");
-  AssetManager::loadShader("simple", "assets/shaders/simple.vert",
-                           "assets/shaders/simple.frag");
-
-  std::map<int, std::vector<std::string>> coolModels = {
-      {-3, {"assets/models/cheetah/cheetah.obj"}},
-      {0, {"assets/models/cheetah1/cheetah.obj"}},
-      {3, {"assets/models/cheetah/cheetah.obj"}},
-      {6, {"assets/editor/models/xyzArrow/model.obj", "simple"}}};
-
-  for (auto [px, name] : coolModels) {
-    Mesh m = AssetManager::loadMesh(name[0], name[0].c_str());
+  WorldLoader l("assets/worlds/test.swld");
+  for (auto [i, x] : l.shaderObjects.all()) {
+    AssetManager::loadShader(i, x[0], x[1]);
+  }
+  for (auto [i, x] : l.meshObjects.all()) {
+    Mesh m = AssetManager::loadMesh(i, x.c_str());
     Entity e = world.createEntity();
-    Renderable r = Renderable{
-        m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
-        &AssetManager::getShader(name.size() > 1 ? name[1] : "default")};
-    Logger::Debug("SHADER: %s", name.size() > 1 ? name[1].c_str() : "default");
+    Renderable r(m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
+                 &AssetManager::getShader("default"));
     Transform et = Transform{};
-    et.position.x = px;
     transforms.add(e, et);
     renderables.add(e, r);
   }
 
-  Mesh m = AssetManager::loadMesh("floor", "assets/models/cheetah/cheetah.obj");
-  Entity e = world.createEntity();
-  Renderable r = Renderable(m.VAO, m.indexCount, 0x0004, m.textures,
-                            &AssetManager::getShader("default"));
-
-  Transform et = Transform{};
-  et.scale = {10, 1, 10};
-  et.position.y = -5;
-  transforms.add(e, et);
-  renderables.add(e, r);
+  renderSystem = RenderSystem();
 
   Entity ce = world.createEntity();
   CameraComponent cc = CameraComponent();
@@ -303,13 +283,6 @@ void Game::processInput() {
                                   window.getGLFWwindow());
     }
     break;
-  }
-
-  if (inputHandler.isMousePressed(0)) {
-    Ray mouseRay = getRayVP(camera.getViewMatrix(),
-                            camera.getProjectionMatrix(), camera.position);
-
-    transforms.get(1).position = mouseRay.at(10);
   }
 };
 

@@ -1,0 +1,13 @@
+V0.1.0
+BEGINSHADERdefault
+SHADERVERTassets/shaders/default.vert
+SHADERFRAGassets/shaders/default.frag
+ENDSHADER
+BEGINSHADERsimple
+SHADERVERTassets/shaders/simple.vert
+SHADERFRAGassets/shaders/simple.frag
+ENDSHADER
+BEGINMESHcheetah
+MESHassets/models/cheetah/cheetah.obj
+ENDMESH
+

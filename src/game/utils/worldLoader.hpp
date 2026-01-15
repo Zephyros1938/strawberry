@@ -67,7 +67,7 @@ public:
       std::string currentObjectName;
 
       while (std::getline(file, line)) {
-        std::cout << line << std::endl;
+
         if (line.empty())
           continue;
 
@@ -126,7 +126,6 @@ public:
             if (delim != std::string::npos) {
               std::string key = line.substr(0, delim);
               std::string value = line.substr(delim + 2);
-              std::cout << key << " " << value << std::endl;
               entityBlueprints.back().data[key] = value;
             }
           }

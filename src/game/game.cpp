@@ -172,6 +172,40 @@ void Game::setupScene() {
   uniformBufferManager.registerUniform("uTime", sizeof(float), 4);
 }
 
+void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
+  WorldLoader l(fp);
+  for (auto [i, x] : l.shaderObjects.all()) {
+    AssetManager::loadShader(i, x[0], x[1]);
+  }
+  for (auto [i, x] : l.meshObjects.all()) {
+    AssetManager::loadMesh(i, x.c_str());
+  }
+  for (auto i : l.entityBlueprints) {
+    Entity e = world.createEntity();
+    names.add(e, i.name);
+    if (i.data.count("POS")) {
+      Transform t;
+      t.position = parseVec<glm::vec3, 3>(i.data.at("POS"));
+      if (i.data.count("ROT")) {
+        t.rotation = parseVec<glm::vec3, 3>(i.data.at("ROT"));
+      }
+      if (i.data.count("SCALE")) {
+        t.scale = parseVec<glm::vec3, 3>(i.data.at("SCALE"));
+      }
+      transforms.add(e, t);
+    }
+    if (i.data.count("MESH")) {
+      Mesh m = AssetManager::getMesh(i.data.at("MESH").c_str());
+      Renderable r =
+          Renderable{m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
+                     i.data.count("SHADER")
+                         ? &AssetManager::getShader(i.data.at("SHADER").c_str())
+                         : &AssetManager::getShader("default")};
+      renderables.add(e, r);
+    }
+  }
+}
+
 void Game::framebufferSizeCallback(GLFWwindow *window, int width, int height) {
   Game *game = static_cast<Game *>(glfwGetWindowUserPointer(window));
   if (!game)
@@ -194,40 +228,6 @@ void Game::keyCallback(GLFWwindow *window, int key, int scancode, int action,
     return;
 
   game->inputHandler.handleKeyboard(key, scancode, action, mods);
-}
-
-void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
-  WorldLoader l(fp);
-  for (auto [i, x] : l.shaderObjects.all()) {
-    AssetManager::loadShader(i, x[0], x[1]);
-  }
-  for (auto [i, x] : l.meshObjects.all()) {
-    AssetManager::loadMesh(i, x.c_str());
-  }
-  for (auto i : l.entityBlueprints) {
-    Entity e = world.createEntity();
-    names.add(e, i.name);
-    if (i.data.count("POS")) {
-      Transform t;
-      t.position = parseVec3(i.data.at("POS"));
-      if (i.data.count("ROT")) {
-        t.rotation = parseVec3(i.data.at("ROT"));
-      }
-      if (i.data.count("SCALE")) {
-        t.scale = parseVec3(i.data.at("SCALE"));
-      }
-      transforms.add(e, t);
-    }
-    if (i.data.count("MESH")) {
-      Mesh m = AssetManager::getMesh(i.data.at("MESH").c_str());
-      Renderable r =
-          Renderable{m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
-                     i.data.count("SHADER")
-                         ? &AssetManager::getShader(i.data.at("SHADER").c_str())
-                         : &AssetManager::getShader("default")};
-      renderables.add(e, r);
-    }
-  }
 }
 
 void Game::cursorPosCallback(GLFWwindow *window, double x, double y) {

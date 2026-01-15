@@ -5,7 +5,6 @@
 #include "game/components/renderable.hpp"
 #include "game/components/transform.hpp"
 #include "game/systems/camera_system.hpp"
-#include "game/systems/gui_system.hpp"
 #include "game/systems/render_system.hpp"
 #include "platform/gui/guiHandler.hpp"
 #include "platform/input/inputHandler.hpp"

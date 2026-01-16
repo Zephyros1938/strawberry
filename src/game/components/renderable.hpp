@@ -7,6 +7,9 @@ struct Renderable {
   unsigned int vao = 0;
   unsigned int indexCount = 0;
   unsigned int drawMode = 0x0004; // GL_TRIANGLES
+  bool depthTesting = true;
   std::vector<Texture *> textures;
   Shader *shader = nullptr;
 };
+
+struct Color : glm::vec3 {};

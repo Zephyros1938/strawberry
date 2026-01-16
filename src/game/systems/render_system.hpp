@@ -24,40 +24,47 @@ public:
       if (renderable.shader)
         renderable.shader->use();
 
-      // 1. Compute model matrix using the transform we know exists
       glm::mat4 model = glm::mat4(1.0f);
+      Color c = Color{{1.0, 0.0, 0.5}};
       if (ecs.hasComponent<Transform>(entity)) {
         auto &transform = ecs.getComponent<Transform>(entity);
-        // 1. Translation
         model = glm::translate(model, transform.position);
-
-        // 2. Rotation (Order: Y -> X -> Z is usually best for standard
-        // FPS/Euler logic)
         model = glm::rotate(model, glm::radians(transform.rotation.y),
                             glm::vec3(0, 1, 0));
         model = glm::rotate(model, glm::radians(transform.rotation.x),
                             glm::vec3(1, 0, 0));
         model = glm::rotate(model, glm::radians(transform.rotation.z),
                             glm::vec3(0, 0, 1));
-
-        // 3. Scale
         model = glm::scale(model, transform.scale);
       }
 
       renderable.shader->setMat4("uModel", model);
 
-      // 2. Bind textures
+      if (ecs.hasComponent<Color>(entity)) {
+        c = ecs.getComponent<Color>(entity);
+      }
+
+      renderable.shader->setVec3("uColor", c);
+
+      // 1. Bind textures
       for (size_t i = 0; i < renderable.textures.size(); ++i) {
         renderable.textures[i]->bind(GL_TEXTURE0 + static_cast<int>(i));
       }
 
-      // 3. Draw
+      // 2. Draw
       glBindVertexArray(renderable.vao);
-      glDrawElements(renderable.drawMode, renderable.indexCount,
-                     GL_UNSIGNED_INT, 0);
+      if (renderable.depthTesting) {
+        glDrawElements(renderable.drawMode, renderable.indexCount,
+                       GL_UNSIGNED_INT, 0);
+      } else {
+        glDisable(GL_DEPTH_TEST);
+        glDrawElements(renderable.drawMode, renderable.indexCount,
+                       GL_UNSIGNED_INT, 0);
+        glEnable(GL_DEPTH_TEST);
+      }
       glBindVertexArray(0);
 
-      // 4. Unbind
+      // 3. Unbind
       for (size_t i = 0; i < renderable.textures.size(); ++i) {
         renderable.textures[i]->unbind(GL_TEXTURE0 + static_cast<int>(i));
       }

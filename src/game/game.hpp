@@ -2,6 +2,7 @@
 
 #include "engine/ecs2.hpp"
 #include "game/systems/camera_system.hpp"
+#include "game/systems/lightingSystem.hpp"
 #include "game/systems/render_system.hpp"
 #include "platform/gui/guiHandler.hpp"
 #include "platform/input/inputHandler.hpp"
@@ -50,4 +51,10 @@ private:
   // Systems
   RenderSystem renderSystem;
   CameraSystem cameraSystem;
+
+  LightingSystem lightingSystem;
+
+  float deltaTime;
+  float lastFrame;
+  float totalTime;
 };

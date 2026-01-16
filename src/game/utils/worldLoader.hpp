@@ -78,6 +78,7 @@ public:
           continue;
         if (line.substr(0, 1) == "#")
           continue;
+        line = line.substr(line.find_first_not_of("\t "));
 
         switch (currentReadPhase) {
         case FIND:

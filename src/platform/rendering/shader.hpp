@@ -83,6 +83,9 @@ public:
     glUniformMatrix4fv(getUniformName(name), 1, GL_FALSE,
                        glm::value_ptr(value));
   }
+  void setVec3(const std::string &name, const glm::vec3 value) {
+    glUniform3f(getUniformName(name), value.x, value.y, value.z);
+  }
 
 private:
   std::unordered_map<std::string, GLint> uniformNames = {};

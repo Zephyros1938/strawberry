@@ -2,10 +2,12 @@
 #include "assets/assetManager.hpp"
 #include "engine/ecs2.hpp"
 #include "game/components/camera_component.hpp"
+#include "game/components/light.hpp"
 #include "game/components/name_component.hpp"
 #include "game/components/renderable.hpp"
 #include "game/components/transform.hpp"
 #include "game/systems/camera_system.hpp"
+#include "game/systems/lightingSystem.hpp"
 #include "game/systems/render_system.hpp"
 #include "game/utils/worldLoader.hpp"
 #include "imgui.h"
@@ -15,6 +17,7 @@
 #include "platform/input/inputHandler.hpp"
 #include "platform/rendering/uniform_buffer_management.hpp"
 #include "util/logger.hpp"
+#include "util/stringUtils.hpp"
 #include <GLFW/glfw3.h>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
@@ -26,7 +29,8 @@
 Game::Game(int width, int height, const std::string &title)
     : window(width, height, title), inputHandler(false, false),
       uniformBufferManager(256, 0), guiHandler(window.getGLFWwindow()),
-      cameraSystem(&camera) {}
+
+      cameraSystem(&camera), lightingSystem(1), totalTime(0.0) {}
 
 void Game::run() {
   setupScene();
@@ -48,6 +52,7 @@ void Game::run() {
     inputHandler.updateMouseButton();
 
     cameraSystem.update(world);
+    lightingSystem.Update(world);
 
     glm::mat4 cameraProjectionMatrix = camera.getProjectionMatrix();
     glm::mat4 cameraViewMatrix = camera.getViewMatrix();
@@ -120,6 +125,7 @@ void Game::setupScene() {
 void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
   WorldLoader l(fp);
   for (auto [i, x] : l.shaderObjects.all()) {
+    Logger::Debug("Loading shader %s", i.c_str());
     AssetManager::loadShader(i, x[0], x[1]);
   }
   for (auto [i, x] : l.meshObjects.all()) {
@@ -143,17 +149,57 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
     }
     if (i.data.count("MESH")) {
       Mesh m = AssetManager::getMesh(i.data.at("MESH").c_str());
-      Renderable r{m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
-                   i.data.count("SHADER")
-                       ? &AssetManager::getShader(i.data.at("SHADER").c_str())
-                       : &AssetManager::getShader("default")};
+
+      Renderable r =
+          Renderable{m.VAO,
+                     m.indexCount,
+                     m.suggestedDrawMode,
+                     true,
+                     m.textures,
+                     i.data.count("SHADER")
+                         ? &AssetManager::getShader(i.data.at("SHADER").c_str())
+                         : &AssetManager::getShader("default")};
+
       world.addComponent(e, r);
+    }
+    if (i.data.count("COLOR")) {
+      Color c(parseVec<glm::vec3>(i.data.at("COLOR")));
+      world.addComponent(e, c);
+    }
+    if (i.data.count("LIGHT")) {
+      std::string ld = i.data.at("LIGHT");
+      size_t delim = ld.find(',');
+      std::string key = ld.substr(0, delim);
+      std::string value = ld.substr(delim + 1);
+      auto params = stringUtils::split(value, ',');
+
+      LightComponent light;
+      std::string typeStr = stringUtils::trim(params[0]);
+
+      if (typeStr == "DIRECTIONAL")
+        light.type = 0;
+      else if (typeStr == "POINT")
+        light.type = 1;
+      else if (typeStr == "SPOT")
+        light.type = 2;
+
+      light.color = {std::stof(params[1]), std::stof(params[2]),
+                     std::stof(params[3])};
+      light.intensity = std::stof(params[4]);
+      light.range = std::stof(params[5]);
+
+      world.addComponent(e, light);
+
+      if (light.type == 2 && params.size() > 6) {
+        SpotLightComponent spot;
+        spot.outerAngle = std::stof(params[6]);
+        world.addComponent(e, spot);
+      }
     }
   }
 
   Entity ce = world.createEntity();
   CameraComponent cc = CameraComponent();
-
   world.addComponent(ce, cc);
 }
 

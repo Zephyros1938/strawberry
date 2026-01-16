@@ -16,7 +16,6 @@
 #include "platform/rendering/uniform_buffer_management.hpp"
 #include "util/logger.hpp"
 #include <GLFW/glfw3.h>
-#include <cstdio>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
 #include <glm/geometric.hpp>
@@ -27,7 +26,7 @@
 Game::Game(int width, int height, const std::string &title)
     : window(width, height, title), inputHandler(false, false),
       uniformBufferManager(256, 0), guiHandler(window.getGLFWwindow()),
-      cameraSystem(&camera), totalTime(0.0) {}
+      cameraSystem(&camera) {}
 
 void Game::run() {
   setupScene();
@@ -37,15 +36,11 @@ void Game::run() {
 
   io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
-  totalTime = 0.0;
-
   while (!window.shouldClose()) {
-    float currentFrame = window.getTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
-    if (deltaTime > 0 && deltaTime < 1.0f) {
-      totalTime += deltaTime;
-    }
+    window.tickFrame();
+
+    float dt = (*window.getDelta());
+    float tt = (*window.getTime());
 
     window.pollEvents();
     processInput();
@@ -58,16 +53,14 @@ void Game::run() {
     glm::mat4 cameraViewMatrix = camera.getViewMatrix();
     uniformBufferManager.setData("uCameraView", &cameraViewMatrix);
     uniformBufferManager.setData("uCameraProjection", &cameraProjectionMatrix);
-    uniformBufferManager.setData("uDeltatime", &deltaTime);
-    uniformBufferManager.setData("uTime", &totalTime);
+    uniformBufferManager.setData("uDeltatime", window.getDelta());
+    uniformBufferManager.setData("uTime", window.getTime());
 
     guiHandler.NewFrame();
     ImGui::Begin("Debugging");
     ImGui::SeparatorText("Window");
-    ImGui::Text("FPS: %.2f", 1.0f / deltaTime);
-    ImGui::Text("Time: %.2f", totalTime);
-    ImGui::Text("GLFW Time: %.2f", window.getTime());
-    ImGui::Text("Difference GLFW-Time: %.02f", window.getTime() - totalTime);
+    ImGui::Text("FPS: %.2f", 1.f / dt);
+    ImGui::Text("GLFW Time: %.2f", tt);
     int wx, wy;
     glfwGetWindowSize(window.getGLFWwindow(), &wx, &wy);
     ImGui::Text("Size: %ix%i", wx, wy);
@@ -93,9 +86,7 @@ void Game::run() {
     if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
       ImGui::SetScrollHereY(1.0f);
     }
-
     ImGui::EndChild();
-
     ImGui::End();
 
     guiHandler.Finalize();
@@ -104,6 +95,7 @@ void Game::run() {
 
     window.swapBuffers();
   }
+  window.cleanup();
 }
 
 void Game::setupScene() {
@@ -135,7 +127,7 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
   }
   for (auto i : l.entityBlueprints) {
     Entity e = world.createEntity();
-    Name n = Name{i.name};
+    Name n{i.name};
     world.addComponent(e, n);
     if (i.data.count("POS")) {
       Transform t{glm::vec3(0), glm::vec3(0), glm::vec3(1)};
@@ -151,11 +143,10 @@ void Game::loadScene(std::string fp = "assets/worlds/test.swld") {
     }
     if (i.data.count("MESH")) {
       Mesh m = AssetManager::getMesh(i.data.at("MESH").c_str());
-      Renderable r =
-          Renderable{m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
-                     i.data.count("SHADER")
-                         ? &AssetManager::getShader(i.data.at("SHADER").c_str())
-                         : &AssetManager::getShader("default")};
+      Renderable r{m.VAO, m.indexCount, m.suggestedDrawMode, m.textures,
+                   i.data.count("SHADER")
+                       ? &AssetManager::getShader(i.data.at("SHADER").c_str())
+                       : &AssetManager::getShader("default")};
       world.addComponent(e, r);
     }
   }
@@ -253,6 +244,7 @@ void Game::mouseButtonCallback(GLFWwindow *window, int button, int action,
 
 void Game::processInput() {
   auto cameras = world.query<CameraComponent>();
+  float deltaTime = (*window.getDelta());
   for (auto &entity : cameras) {
     auto &camComp = world.getComponent<CameraComponent>(entity);
 

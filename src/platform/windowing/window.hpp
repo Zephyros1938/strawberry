@@ -19,7 +19,7 @@ public:
     setupOpenGLState();
   }
 
-  ~Window() {
+  void cleanup() {
     if (window)
       glfwDestroyWindow(window);
     glfwTerminate();
@@ -60,13 +60,24 @@ public:
   int getWidth() { return width; }
   int getHeight() { return height; }
 
-  float getTime() { return glfwGetTime(); }
+  float *getTime() { return &currentFrame; }
+  float *getDelta() { return &deltaTime; }
+
+  void tickFrame() {
+    currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+  }
 
 private:
   int width;
   int height;
   std::string title;
   GLFWwindow *window = nullptr;
+
+  float deltaTime = 0.0;
+  float lastFrame = 0.0;
+  float currentFrame = 0.0;
 
   void initGLFW() {
     if (!glfwInit())

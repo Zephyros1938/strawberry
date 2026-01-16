@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/common.hpp"
 #include "util/logger.hpp"
 #include <fstream>
 #include <iostream>
@@ -70,6 +71,8 @@ public:
       std::string currentObjectName;
 
       while (std::getline(file, line)) {
+
+        line = lstrip(line);
 
         if (line.empty())
           continue;

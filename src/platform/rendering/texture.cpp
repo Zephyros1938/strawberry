@@ -57,8 +57,6 @@ Texture::Texture(const char *path) {
   ID = tex;
 }
 
-Texture::Texture() : ID(0) {}
-
 void Texture::bind(int target = GL_TEXTURE0) const {
   glActiveTexture(target);
   glBindTexture(GL_TEXTURE_2D, ID);

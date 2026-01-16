@@ -58,16 +58,25 @@ public:
 private:
   static void Write(LogLevel level, const char *fmt, va_list args) {
     if (level <= s_logLevel) {
-      // Determine which slot to fill
       int index =
           (s_currentCount < LOG_LENGTH) ? s_currentCount : (LOG_LENGTH - 1);
 
-      // Format the string into our static buffer
       vsnprintf(s_logs[index], MAX_MSG_LEN, fmt, args);
 
       if (s_logConsole) {
+        // ANSI Color Codes
+        const char *RED = "\033[1;31m";
+        const char *YELLOW = "\033[1;33m";
+        const char *GREEN = "\033[1;32m";
+        const char *CYAN = "\033[1;36m";
+        const char *RESET = "\033[0m";
+
         const char *labels[] = {"ERROR", "WARN", "INFO", "DEBUG"};
-        printf("[%s]: %s\n", labels[level], s_logs[index]);
+        const char *colors[] = {RED, YELLOW, GREEN, CYAN};
+
+        // Print: [COLOR][LABEL][RESET]: MESSAGE
+        printf("%s[%s]%s: %s\n", colors[level], labels[level], RESET,
+               s_logs[index]);
       }
 
       if (s_currentCount < LOG_LENGTH)

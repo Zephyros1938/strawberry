@@ -50,8 +50,4 @@ private:
   // Systems
   RenderSystem renderSystem;
   CameraSystem cameraSystem;
-
-  float deltaTime;
-  float lastFrame;
-  float totalTime;
 };

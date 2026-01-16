@@ -9,7 +9,11 @@ public:
   int width, height;
 
   Texture(const char *path);
-  Texture();
+  Texture() : ID(0) {};
+  /*~Texture() {
+    if (ID != 0)
+      glDeleteTextures(1, &ID);
+  }*/
   void bind(int target) const;
   void unbind(int target) const;
 };
